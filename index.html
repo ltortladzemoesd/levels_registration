@@ -43,7 +43,7 @@
   }
   .req::after{ content:" *"; color:#e05353; font-weight:800 }
 
-  /* 30% thinner fields */
+  /* thinner fields */
   .input, select, textarea{
     width:100%;
     border:none; outline:none;
@@ -79,46 +79,40 @@
     font-size:16px; font-weight:300;
   }
 
-  /* NOT resizable */
+  /* not resizable */
   textarea{ min-height:120px; border-radius:var(--radius-sm); resize:none; }
 
-  /* ===== EXACT LAYOUT ===== */
-  /* Row 1: 4 columns (3/12 each) */
+  /* layout */
   .first { grid-column: span 3; }
   .last  { grid-column: span 3; }
   .age   { grid-column: span 3; }
   .mail  { grid-column: span 3; }
 
-  /* Row 2: 3 equal columns (4/12 each) */
   .phonec{ grid-column: span 4; }
   .branch{ grid-column: span 4; }
   .course{ grid-column: span 4; }
 
-  /* Row 3 */
   .msg      { grid-column: 1 / span 6; }
-  /* Align with top of grey textarea */
   .actions  { grid-column: 7 / span 3; display:flex; align-items:flex-start; padding-top:22px; }
+
   .tailpad  { grid-column: 1 / -1; height: 1px; }
 
-  /* Button */
   button[type="submit"]{
     width:100%;
     background:var(--btn); color:var(--btn-text);
-    border:none; padding:12px 20px;     /* same height as fields */
+    border:none; padding:12px 20px;
     font-size:16px; font-weight:800;
     border-radius:var(--radius);
     cursor:pointer;
-    box-shadow:var(--shadow);           /* outline ring removed */
+    box-shadow:var(--shadow);
     transition: transform .08s ease, opacity .2s ease, background .15s ease;
   }
   button[type="submit"]:hover{ background:var(--hover); }
   button[type="submit"]:active{ transform:translateY(1px) }
   button[disabled]{ opacity:.6; cursor:progress }
 
-  /* Success text shown after submit */
   .thanks{ color:var(--label); font-size:16px; display:none; align-self:flex-start; }
 
-  /* Native select chevrons */
   select{
     -webkit-appearance:none; -moz-appearance:none; appearance:none;
     background-image:
@@ -131,7 +125,6 @@
     padding-right:44px;
   }
 
-  /* Responsive collapse */
   @media (max-width:1100px){
     .first,.last,.age,.mail{ grid-column: span 6; }
     .phonec,.branch,.course{ grid-column: span 6; }
@@ -152,63 +145,46 @@
     <form id="enrollForm" novalidate>
       <!-- Row 1 -->
       <div class="field first">
-        <label class="req">First name</label>
+        <label class="req" id="lbl-first">First name</label>
         <input class="input" id="firstName" name="firstName" autocomplete="given-name" required />
       </div>
       <div class="field last">
-        <label class="req">Last name</label>
+        <label class="req" id="lbl-last">Last name</label>
         <input class="input" id="lastName" name="lastName" autocomplete="family-name" required />
       </div>
       <div class="field age">
-        <label class="req">Age</label>
+        <label class="req" id="lbl-age">Age</label>
         <input class="input" id="age" name="age" type="text" inputmode="numeric" required />
       </div>
       <div class="field mail">
-        <label class="req">Email</label>
+        <label class="req" id="lbl-email">Email</label>
         <input class="input" id="email" name="email" type="email" autocomplete="email" required />
       </div>
 
       <!-- Row 2 -->
       <div class="field phonec">
-        <label class="req">Phone</label>
+        <label class="req" id="lbl-phone">Phone</label>
         <div class="phone-shell" id="phoneShell">
           <input id="phone" class="phone" name="phone" type="tel" required />
         </div>
       </div>
       <div class="field branch">
-        <label class="req">Branch</label>
-        <select id="branch" name="branch" required>
-          <option value="" selected disabled>Select a branch</option>
-          <option>Vake</option>
-          <option>Krtsanisi</option>
-        </select>
+        <label class="req" id="lbl-branch">Branch</label>
+        <select id="branch" name="branch" required></select>
       </div>
       <div class="field course">
-        <label class="req">Course</label>
-        <select id="course" name="course" required>
-          <option value="" selected disabled>Select a course</option>
-          <option>Sunday School (age:6–10)</option>
-          <option>Saturday School (age:6–10)</option>
-          <option>General English for Children (age:6–10)</option>
-          <option>IELTS</option>
-          <option>General English for Teenagers (age: 11–17)</option>
-          <option>Private Lessons</option>
-          <option>FCE PET CAE</option>
-          <option>Professional English</option>
-          <option>General English for Adults</option>
-        </select>
+        <label class="req" id="lbl-course">Course</label>
+        <select id="course" name="course" required></select>
       </div>
 
       <!-- Row 3 -->
       <div class="field msg">
-        <label>Leave a message</label>
+        <label id="lbl-message">Leave a message</label>
         <textarea id="message" name="message"></textarea>
       </div>
 
       <div class="actions">
-        <!-- CHANGED: button text to "Submit" -->
         <button id="submitBtn" type="submit">Submit</button>
-        <!-- Success message (hidden by default) -->
         <div id="thanks" class="thanks">Thanks, we received your submission.</div>
       </div>
 
@@ -219,6 +195,100 @@
   <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/intlTelInput.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/utils.js"></script>
   <script>
+    /* ---------- i18n dictionary ---------- */
+    const i18n = {
+      en: {
+        labels: { first:'First name', last:'Last name', age:'Age', email:'Email', phone:'Phone', branch:'Branch', course:'Course', message:'Leave a message' },
+        placeholders: { branch:'Select a branch', course:'Select a course' },
+        options: {
+          branches: ['Vake','Krtsanisi'],
+          courses: [
+            'Sunday School (age:6–10)',
+            'Saturday School (age:6–10)',
+            'General English for Children (age:6–10)',
+            'IELTS',
+            'General English for Teenagers (age: 11–17)',
+            'Private Lessons',
+            'FCE PET CAE',
+            'Professional English',
+            'General English for Adults'
+          ]
+        },
+        button: 'Submit',
+        thanks: 'Thanks, we received your submission.'
+      },
+      ka: {
+        labels: { first:'სახელი', last:'გვარი', age:'ასაკი', email:'Email', phone:'ტელეფონი', branch:'ფილიალი', course:'კურსი', message:'დატოვეთ შეტყობინება' },
+        placeholders: { branch:'აირჩიეთ ფილიალი', course:'აირჩიეთ კურსი' },
+        options: {
+          branches: ['ვაკე','კრწანისი'],
+          courses: [
+            'საკვირაო სკოლა (ასაკი: 6–10)',
+            'შაბათის სკოლა (ასაკი: 6–10)',
+            'ზოგადი ინგლისური ბავშვებისთვის (ასაკი: 6–10)',
+            'IELTS',
+            'ზოგადი ინგლისური მოზარდებისთვის (ასაკი: 11–17)',
+            'ინდივიდუალური გაკვეთილები',
+            'FCE PET CAE',
+            'პროფესიული ინგლისური',
+            'ზოგადი ინგლისური ზრდასრულთათვის'
+          ]
+        },
+        button: 'გაგზავნა',
+        thanks: 'გმადლობთ, თქვენი განაცხადი მივიღეთ.'
+      }
+    };
+
+    let currentLang = 'en';
+
+    function fillSelect(selectEl, placeholder, options){
+      selectEl.innerHTML = '';
+      const ph = document.createElement('option');
+      ph.value = ''; ph.disabled = true; ph.selected = true; ph.textContent = placeholder;
+      selectEl.appendChild(ph);
+      options.forEach(text => {
+        const op = document.createElement('option');
+        op.textContent = text;
+        selectEl.appendChild(op);
+      });
+    }
+
+    function setLanguage(lang){
+      currentLang = (lang && i18n[lang]) ? lang : 'en';
+      const t = i18n[currentLang];
+
+      // Labels
+      document.getElementById('lbl-first').textContent   = t.labels.first;
+      document.getElementById('lbl-last').textContent    = t.labels.last;
+      document.getElementById('lbl-age').textContent     = t.labels.age;
+      document.getElementById('lbl-email').textContent   = t.labels.email;
+      document.getElementById('lbl-phone').textContent   = t.labels.phone;
+      document.getElementById('lbl-branch').textContent  = t.labels.branch;
+      document.getElementById('lbl-course').textContent  = t.labels.course;
+      document.getElementById('lbl-message').textContent = t.labels.message;
+
+      // Selects
+      fillSelect(document.getElementById('branch'), t.placeholders.branch, t.options.branches);
+      fillSelect(document.getElementById('course'), t.placeholders.course, t.options.courses);
+
+      // Button + thanks
+      document.getElementById('submitBtn').textContent = t.button;
+      document.getElementById('thanks').textContent = t.thanks;
+
+      // Set document lang attr (helps screen readers)
+      document.documentElement.setAttribute('lang', currentLang);
+    }
+
+    // Read ?lang=... if present
+    const urlLang = new URLSearchParams(location.search).get('lang');
+    setLanguage(urlLang || 'en');
+
+    // Accept language updates from Wix via postMessage
+    window.addEventListener('message', (event) => {
+      if (event?.data?.type === 'set-lang') setLanguage(event.data.lang);
+    });
+
+    /* ---------- phone input ---------- */
     const phoneEl = document.getElementById('phone');
     const iti = window.intlTelInput(phoneEl, {
       initialCountry: "ge",
@@ -227,6 +297,7 @@
       preferredCountries: ["ge","tr","ae","gb"],
     });
 
+    /* ---------- validation & submit (unchanged) ---------- */
     const form = document.getElementById('enrollForm');
     const requiredSelectors = ['#firstName','#lastName','#age','#email','#branch','#course','#phone'];
 
@@ -281,17 +352,17 @@
         branch   : document.getElementById('branch').value,
         course   : document.getElementById('course').value,
         message  : document.getElementById('message').value.trim(),
+        lang     : currentLang,
         ts       : new Date().toISOString()
       };
 
-      // Send to Wix page
       window.parent?.postMessage({ type: "levels-enroll", data: payload }, "*");
 
-      // Success UI: hide button, show thanks message
+      // Success UI: hide button, show thanks
       document.getElementById('submitBtn').style.display = 'none';
       document.getElementById('thanks').style.display = 'block';
 
-      // Reset fields (button stays hidden as requested)
+      // Reset fields
       form.reset();
       iti.setCountry("ge");
       requiredSelectors.forEach(sel=> setInvalid(document.querySelector(sel), false));
@@ -299,4 +370,3 @@
   </script>
 </body>
 </html>
-
