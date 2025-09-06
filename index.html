@@ -79,7 +79,7 @@
     font-size:16px; font-weight:300;
   }
 
-  /* NOT resizable now (CHANGE #2) */
+  /* NOT resizable */
   textarea{ min-height:120px; border-radius:var(--radius-sm); resize:none; }
 
   /* ===== EXACT LAYOUT ===== */
@@ -94,11 +94,10 @@
   .branch{ grid-column: span 4; }
   .course{ grid-column: span 4; }
 
-  /* Row 3 per your spec */
+  /* Row 3 */
   .msg      { grid-column: 1 / span 6; }
-  /* Align button with top of the GREY textarea (label 14px + 8px margin = 22px) */
-  .actions  { grid-column: 7 / span 3; display:flex; align-items:flex-start; padding-top:22px; } /* CHANGE #1 */
-
+  /* Align with top of grey textarea */
+  .actions  { grid-column: 7 / span 3; display:flex; align-items:flex-start; padding-top:22px; }
   .tailpad  { grid-column: 1 / -1; height: 1px; }
 
   /* Button */
@@ -109,12 +108,15 @@
     font-size:16px; font-weight:800;
     border-radius:var(--radius);
     cursor:pointer;
-    box-shadow:var(--shadow);           /* outline ring removed previously */
+    box-shadow:var(--shadow);           /* outline ring removed */
     transition: transform .08s ease, opacity .2s ease, background .15s ease;
   }
   button[type="submit"]:hover{ background:var(--hover); }
   button[type="submit"]:active{ transform:translateY(1px) }
   button[disabled]{ opacity:.6; cursor:progress }
+
+  /* Success text shown after submit */
+  .thanks{ color:var(--label); font-size:16px; display:none; align-self:flex-start; }
 
   /* Native select chevrons */
   select{
@@ -204,7 +206,10 @@
       </div>
 
       <div class="actions">
-        <button id="submitBtn" type="submit">Enroll</button>
+        <!-- CHANGED: button text to "Submit" -->
+        <button id="submitBtn" type="submit">Submit</button>
+        <!-- Success message (hidden by default) -->
+        <div id="thanks" class="thanks">Thanks, we received your submission.</div>
       </div>
 
       <div class="tailpad"></div>
@@ -279,8 +284,14 @@
         ts       : new Date().toISOString()
       };
 
+      // Send to Wix page
       window.parent?.postMessage({ type: "levels-enroll", data: payload }, "*");
 
+      // Success UI: hide button, show thanks message
+      document.getElementById('submitBtn').style.display = 'none';
+      document.getElementById('thanks').style.display = 'block';
+
+      // Reset fields (button stays hidden as requested)
       form.reset();
       iti.setCountry("ge");
       requiredSelectors.forEach(sel=> setInvalid(document.querySelector(sel), false));
@@ -288,3 +299,4 @@
   </script>
 </body>
 </html>
+
