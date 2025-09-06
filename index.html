@@ -79,7 +79,8 @@
     font-size:16px; font-weight:300;
   }
 
-  textarea{ min-height:120px; border-radius:var(--radius-sm) }
+  /* NOT resizable now (CHANGE #2) */
+  textarea{ min-height:120px; border-radius:var(--radius-sm); resize:none; }
 
   /* ===== EXACT LAYOUT ===== */
   /* Row 1: 4 columns (3/12 each) */
@@ -95,7 +96,8 @@
 
   /* Row 3 per your spec */
   .msg      { grid-column: 1 / span 6; }
-  .actions  { grid-column: 7 / span 3; display:flex; align-items:flex-start; } /* CHANGED: top aligned */
+  /* Align button with top of the GREY textarea (label 14px + 8px margin = 22px) */
+  .actions  { grid-column: 7 / span 3; display:flex; align-items:flex-start; padding-top:22px; } /* CHANGE #1 */
 
   .tailpad  { grid-column: 1 / -1; height: 1px; }
 
@@ -107,10 +109,9 @@
     font-size:16px; font-weight:800;
     border-radius:var(--radius);
     cursor:pointer;
-    box-shadow:var(--shadow);           /* outline ring removed */
+    box-shadow:var(--shadow);           /* outline ring removed previously */
     transition: transform .08s ease, opacity .2s ease, background .15s ease;
   }
-  button[type="submit"]{ background:var(--btn); }
   button[type="submit"]:hover{ background:var(--hover); }
   button[type="submit"]:active{ transform:translateY(1px) }
   button[disabled]{ opacity:.6; cursor:progress }
@@ -133,7 +134,7 @@
     .first,.last,.age,.mail{ grid-column: span 6; }
     .phonec,.branch,.course{ grid-column: span 6; }
     .msg{ grid-column: 1 / -1; }
-    .actions{ grid-column: 1 / -1; }
+    .actions{ grid-column: 1 / -1; padding-top:0; }
     button[type="submit"]{ width:100% }
   }
   @media (max-width:680px){
@@ -158,7 +159,6 @@
       </div>
       <div class="field age">
         <label class="req">Age</label>
-        <!-- CHANGED: plain text (no spinners) -->
         <input class="input" id="age" name="age" type="text" inputmode="numeric" required />
       </div>
       <div class="field mail">
@@ -214,7 +214,6 @@
   <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/intlTelInput.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/utils.js"></script>
   <script>
-    // Phone with flag
     const phoneEl = document.getElementById('phone');
     const iti = window.intlTelInput(phoneEl, {
       initialCountry: "ge",
@@ -223,7 +222,6 @@
       preferredCountries: ["ge","tr","ae","gb"],
     });
 
-    // Validation: pink highlight only (no global message)
     const form = document.getElementById('enrollForm');
     const requiredSelectors = ['#firstName','#lastName','#age','#email','#branch','#course','#phone'];
 
@@ -236,7 +234,6 @@
     }
     function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
-    // live clear
     requiredSelectors.forEach(sel=>{
       const el = document.querySelector(sel);
       const clear = () => {
@@ -267,7 +264,7 @@
       const emailEl = document.getElementById('email');
       if(!validEmail(emailEl.value.trim())){ setInvalid(emailEl,true); anyInvalid=true; }
 
-      if(anyInvalid) return; // stop; fields already pink
+      if(anyInvalid) return;
 
       const payload = {
         firstName: document.getElementById('firstName').value.trim(),
@@ -282,10 +279,8 @@
         ts       : new Date().toISOString()
       };
 
-      // Send to Wix page
       window.parent?.postMessage({ type: "levels-enroll", data: payload }, "*");
 
-      // Reset
       form.reset();
       iti.setCountry("ge");
       requiredSelectors.forEach(sel=> setInvalid(document.querySelector(sel), false));
