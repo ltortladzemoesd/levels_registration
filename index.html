@@ -5,37 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Levels Academy – Registration Form</title>
 
-<!-- Red Hat Display (labels bold, inputs light) -->
+<!-- Red Hat Display -->
 <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;700;800&display=swap" rel="stylesheet">
-
-<!-- intl-tel-input for phone -->
+<!-- intl-tel-input -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/css/intlTelInput.css"/>
 
 <style>
   :root{
-    --field-bg:#f1f3f3;     /* light gray fill */
-    --label:#2b445b;        /* field title color */
-    --mint:#bfe8de;         /* course select bar */
-    --invalid:#fde7e7;      /* pinkish invalid fill */
-    --btn:#1f3e63;          /* enroll button */
-    --btn-text:#ffffff;
+    --field-bg:#f1f3f3;     /* light gray fields */
+    --label:#2b445b;        /* titles */
+    --invalid:#fde7e7;      /* pink invalid */
+    --btn:#233e57;          /* enroll button */
+    --btn-text:#fff;
     --radius:28px;
     --radius-sm:22px;
-    --shadow: 0 10px 22px rgba(0,0,0,.07);
+    --shadow:0 10px 22px rgba(0,0,0,.07);
   }
-
   *{box-sizing:border-box}
   html,body{margin:0}
   body{
-    font-family:"Red Hat Display", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-family:"Red Hat Display",ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
     background:transparent; color:#0f1f28;
   }
-
-  .wrap{
-    width:min(1200px,100%);
-    margin:0 auto;
-    padding:22px 16px 28px;
-  }
+  .wrap{ width:min(1200px,100%); margin:0 auto; padding:22px 16px 28px; }
 
   form{
     display:grid;
@@ -45,42 +37,35 @@
 
   .field label{
     display:block;
-    font-weight:700;                 /* Bold for titles */
+    font-weight:700;               /* titles Bold */
     color:var(--label);
     font-size:14px;
     margin:0 0 8px;
   }
   .req::after{ content:" *"; color:#e05353; font-weight:800 }
 
-  /* Inputs */
   .input, select, textarea{
     width:100%;
-    border:none;
-    outline:none;
+    border:none; outline:none;
     background:var(--field-bg);
     border-radius:var(--radius);
     padding:18px 20px;
     font-size:16px;
     line-height:1.25;
-    font-weight:300;                 /* Light for inputs */
+    font-weight:300;               /* fields Light */
     transition: box-shadow .15s ease, background .15s ease;
   }
   .input:focus, select:focus, textarea:focus{
     box-shadow:0 0 0 3px rgba(35,184,153,.16);
     background:#eef1f1;
   }
+  .invalid{ background:var(--invalid) !important; box-shadow:none !important; }
 
-  /* Invalid state (no global message; just pink field) */
-  .invalid{
-    background:var(--invalid) !important;
-    box-shadow:none !important;
-  }
-
-  /* Phone field container (so the rounded fill matches your design) */
+  /* Phone shell so flag input has same rounded bg */
   .phone-shell{
     background:var(--field-bg);
     border-radius:var(--radius);
-    padding:10px 12px 10px 12px;
+    padding:10px 12px;
     transition: box-shadow .15s ease, background .15s ease;
   }
   .phone-shell:focus-within{
@@ -88,55 +73,41 @@
     background:#eef1f1;
   }
   .phone{
-    width:100%;
-    border:none;
-    background:transparent;
-    outline:none;
-    padding:8px 8px 8px 58px; /* space for flag */
-    font-size:16px;
-    font-weight:300;
+    width:100%; border:none; background:transparent; outline:none;
+    padding:8px 8px 8px 58px; /* room for flag */
+    font-size:16px; font-weight:300;
   }
-
-  /* Course mint bar: taller + bold like your screenshot */
-  .select-mint{ background:var(--mint) }
-  .select-lg{ padding-top:22px; padding-bottom:22px; font-weight:700 }
 
   textarea{ min-height:140px; border-radius:var(--radius-sm) }
 
-  /* Grid areas to match the screenshot */
-  .first { grid-column: span 3; }
+  /* GRID – EXACT LAYOUT */
+  .first { grid-column: span 3; }  /* row 1: 4 across */
   .last  { grid-column: span 3; }
   .age   { grid-column: span 3; }
   .mail  { grid-column: span 3; }
 
-  .phonec{ grid-column: span 6; }
-  .branch{ grid-column: span 6; }
+  .phonec{ grid-column: 1 / span 6; } /* row 2: Phone + Branch (half/half) */
+  .branch{ grid-column: 7 / span 6; }
 
-  .course{ grid-column: 1 / -1; }
-  .msg   { grid-column: 1 / -1; }
+  .course{ grid-column: 1 / -1; }     /* row 3: Course full width */
+  .msg   { grid-column: 1 / -1; }     /* row 4: Message full width */
 
   .actions{ grid-column: 1 / -1; display:flex; justify-content:center; }
 
-  /* Enroll button (rounded pill with subtle outer ring like in your shot) */
+  /* Button (centered pill) */
   button[type="submit"]{
-    background:var(--btn);
-    color:var(--btn-text);
-    border:none;
-    padding:16px 38px;
-    font-size:18px;
-    font-weight:800;
-    border-radius:38px;
+    background:var(--btn); color:var(--btn-text);
+    border:none; padding:16px 38px;
+    font-size:18px; font-weight:800; border-radius:38px;
     cursor:pointer;
-    box-shadow:
-      0 0 0 4px rgba(39,93,173,.18),  /* soft outer ring */
-      var(--shadow);
+    box-shadow:0 0 0 4px rgba(39,93,173,.18), var(--shadow);
     transition: transform .08s ease, opacity .2s ease;
   }
   button[type="submit"]:hover{ opacity:.96 }
-  button[type="submit"]:active{ transform: translateY(1px) }
+  button[type="submit"]:active{ transform:translateY(1px) }
   button[disabled]{ opacity:.6; cursor:progress }
 
-  /* Remove default arrow background, keep custom chevron */
+  /* Native select chevrons (no weird OS bg) */
   select{
     -webkit-appearance:none; -moz-appearance:none; appearance:none;
     background-image:
@@ -152,6 +123,7 @@
   /* Responsive collapse */
   @media (max-width:1100px){
     .first,.last,.age,.mail{ grid-column: span 6; }
+    .phonec,.branch{ grid-column: span 6; }
   }
   @media (max-width:680px){
     form{ gap:16px }
@@ -165,22 +137,19 @@
 <body>
   <div class="wrap">
     <form id="enrollForm" novalidate>
-      <!-- Row 1: 4 fields across -->
+      <!-- Row 1: 4 across -->
       <div class="field first">
         <label class="req">First name</label>
         <input class="input" id="firstName" name="firstName" autocomplete="given-name" required />
       </div>
-
       <div class="field last">
         <label class="req">Last name</label>
         <input class="input" id="lastName" name="lastName" autocomplete="family-name" required />
       </div>
-
       <div class="field age">
         <label class="req">Age</label>
         <input class="input" id="age" name="age" type="number" min="3" max="99" inputmode="numeric" required />
       </div>
-
       <div class="field mail">
         <label class="req">Email</label>
         <input class="input" id="email" name="email" type="email" autocomplete="email" required />
@@ -193,7 +162,6 @@
           <input id="phone" class="phone" name="phone" type="tel" required />
         </div>
       </div>
-
       <div class="field branch">
         <label class="req">Branch</label>
         <select id="branch" name="branch" required>
@@ -203,34 +171,30 @@
         </select>
       </div>
 
-      <!-- Course (full width, mint) -->
+      <!-- Row 3: Course full width (same gray style) -->
       <div class="field course">
         <label class="req">Course</label>
-        <select id="course" name="course" class="select-mint select-lg" required>
+        <select id="course" name="course" required>
           <option value="" selected disabled>Select a course</option>
-          <optgroup label="Children & Teens">
-            <option>Sunday School (age:6–10)</option>
-            <option>Saturday School (age:6–10)</option>
-            <option>General English for Children (age:6–10)</option>
-            <option>General English for Teenagers (age: 11–17)</option>
-            <option>IELTS</option>
-            <option>Private Lessons</option>
-          </optgroup>
-          <optgroup label="Adults">
-            <option>FCE PET CAE</option>
-            <option>Professional English</option>
-            <option>General English for Adults</option>
-          </optgroup>
+          <option>Sunday School (age:6–10)</option>
+          <option>Saturday School (age:6–10)</option>
+          <option>General English for Children (age:6–10)</option>
+          <option>IELTS</option>
+          <option>General English for Teenagers (age: 11–17)</option>
+          <option>Private Lessons</option>
+          <option>FCE PET CAE</option>
+          <option>Professional English</option>
+          <option>General English for Adults</option>
         </select>
       </div>
 
-      <!-- Message -->
+      <!-- Row 4: Message -->
       <div class="field msg">
         <label>Leave a message</label>
-        <textarea id="message" name="message" placeholder=""></textarea>
+        <textarea id="message" name="message"></textarea>
       </div>
 
-      <!-- Submit -->
+      <!-- Button -->
       <div class="actions">
         <button id="submitBtn" type="submit">Enroll</button>
       </div>
@@ -240,7 +204,7 @@
   <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/intlTelInput.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.6/build/js/utils.js"></script>
   <script>
-    /* ========= Phone with flag ========= */
+    // Phone with flag
     const phoneEl = document.getElementById('phone');
     const iti = window.intlTelInput(phoneEl, {
       initialCountry: "ge",
@@ -249,82 +213,57 @@
       preferredCountries: ["ge","tr","ae","gb"],
     });
 
-    /* ========= Validation: highlight fields in pink, no global message ========= */
+    // Validation: pink highlight only (no global message)
     const form = document.getElementById('enrollForm');
-    const requiredSelectors = [
-      '#firstName', '#lastName', '#age', '#email', '#branch', '#course', '#phone'
-    ];
+    const requiredSelectors = ['#firstName','#lastName','#age','#email','#branch','#course','#phone'];
 
-    // helper to toggle invalid class
     function setInvalid(el, on){
       if(el.id === 'phone'){
-        // wrap shell for phone visual
-        const shell = document.getElementById('phoneShell');
-        on ? shell.classList.add('invalid') : shell.classList.remove('invalid');
+        document.getElementById('phoneShell').classList.toggle('invalid', on);
       }else{
-        on ? el.classList.add('invalid') : el.classList.remove('invalid');
+        el.classList.toggle('invalid', on);
       }
     }
-
     function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
-    // real-time clearing of invalid as user types/selects
-    requiredSelectors.forEach(sel => {
+    // live clear
+    requiredSelectors.forEach(sel=>{
       const el = document.querySelector(sel);
-      const handler = () => {
-        if(el.id === 'phone'){
-          if(iti.isValidNumber()) setInvalid(el, false);
-        }else if(el.type === 'select-one'){
-          if(el.value) setInvalid(el, false);
-        }else{
-          if(el.value.trim() !== '') setInvalid(el, false);
-        }
+      const clear = () => {
+        if(el.id==='phone'){ if(iti.isValidNumber()) setInvalid(el,false); }
+        else if(el.type==='select-one'){ if(el.value) setInvalid(el,false); }
+        else { if(el.value.trim()!=='') setInvalid(el,false); }
       };
-      el.addEventListener('input', handler);
-      el.addEventListener('change', handler);
+      el.addEventListener('input', clear);
+      el.addEventListener('change', clear);
     });
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', (e)=>{
       e.preventDefault();
-
       let anyInvalid = false;
 
-      // required presence
-      requiredSelectors.forEach(sel => {
+      requiredSelectors.forEach(sel=>{
         const el = document.querySelector(sel);
-        let bad = false;
-
-        if(el.id === 'phone'){
-          bad = !iti.isValidNumber();
-        }else if(el.type === 'select-one'){
-          bad = !el.value;
-        }else{
-          bad = (el.value.trim() === '');
-        }
-        setInvalid(el, bad);
-        anyInvalid = anyInvalid || bad;
+        let bad=false;
+        if(el.id==='phone'){ bad = !iti.isValidNumber(); }
+        else if(el.type==='select-one'){ bad = !el.value; }
+        else { bad = (el.value.trim()===''); }
+        setInvalid(el, bad); anyInvalid = anyInvalid || bad;
       });
 
-      // specific checks
-      const age = document.getElementById('age').value.trim();
-      if(isNaN(Number(age)) || Number(age) < 3 || Number(age) > 99){
-        setInvalid(document.getElementById('age'), true);
-        anyInvalid = true;
-      }
-      const email = document.getElementById('email').value.trim();
-      if(!validEmail(email)){
-        setInvalid(document.getElementById('email'), true);
-        anyInvalid = true;
-      }
+      const ageEl = document.getElementById('age');
+      const age = ageEl.value.trim();
+      if(isNaN(Number(age)) || Number(age)<3 || Number(age)>99){ setInvalid(ageEl,true); anyInvalid=true; }
+      const emailEl = document.getElementById('email');
+      if(!validEmail(emailEl.value.trim())){ setInvalid(emailEl,true); anyInvalid=true; }
 
-      if(anyInvalid) return; // stop here; fields already pink
+      if(anyInvalid) return; // stop; fields already pink
 
-      // Build payload and send upward to Wix (or your webhook if you add one)
       const payload = {
         firstName: document.getElementById('firstName').value.trim(),
         lastName : document.getElementById('lastName').value.trim(),
         age      : age,
-        email    : email,
+        email    : emailEl.value.trim(),
         phone    : iti.getNumber(),
         phoneCC  : iti.getSelectedCountryData()?.dialCode,
         branch   : document.getElementById('branch').value,
@@ -333,16 +272,14 @@
         ts       : new Date().toISOString()
       };
 
-      // Send to parent Wix page (capture with $w('#htmlComponent').onMessage)
+      // send to Wix page
       window.parent?.postMessage({ type: "levels-enroll", data: payload }, "*");
 
-      // Reset visual state (keep Georgia as default)
+      // reset
       form.reset();
       iti.setCountry("ge");
-      // Clear any invalid highlights
-      requiredSelectors.forEach(sel => setInvalid(document.querySelector(sel), false));
+      requiredSelectors.forEach(sel=> setInvalid(document.querySelector(sel), false));
     });
   </script>
 </body>
 </html>
-
