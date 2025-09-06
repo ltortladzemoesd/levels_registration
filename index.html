@@ -367,6 +367,24 @@
       iti.setCountry("ge");
       requiredSelectors.forEach(sel=> setInvalid(document.querySelector(sel), false));
     });
+
+    // --- Auto-resize: report height to parent ---
+function postSize() {
+  const h = Math.ceil(document.querySelector('.wrap').offsetHeight);
+  window.parent?.postMessage({ type: 'form:resize', height: h }, '*');
+}
+new ResizeObserver(postSize).observe(document.querySelector('.wrap'));
+window.addEventListener('load', postSize);
+window.addEventListener('resize', postSize);
+
+// Call after language switches / success message too:
+const _setLanguage = setLanguage;
+setLanguage = (...args) => { _setLanguage(...args); postSize(); };
+const _afterSubmitUI = () => {             // call this where you show the thanks message
+  document.getElementById('submitBtn').style.display = 'none';
+  document.getElementById('thanks').style.display = 'block';
+  postSize();
+};
   </script>
 </body>
 </html>
