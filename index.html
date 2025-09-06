@@ -368,23 +368,33 @@
       requiredSelectors.forEach(sel=> setInvalid(document.querySelector(sel), false));
     });
 
-    // --- Auto-resize: report height to parent ---
+// --- Auto-resize: measure .wrap and report to parent ---
 function postSize() {
-  const h = Math.ceil(document.querySelector('.wrap').offsetHeight);
+  const wrap = document.querySelector('.wrap');
+  if (!wrap) return;
+  const h = Math.ceil(wrap.offsetHeight);
   window.parent?.postMessage({ type: 'form:resize', height: h }, '*');
 }
-new ResizeObserver(postSize).observe(document.querySelector('.wrap'));
 window.addEventListener('load', postSize);
 window.addEventListener('resize', postSize);
+new ResizeObserver(postSize).observe(document.querySelector('.wrap'));
 
-// Call after language switches / success message too:
+// parent can ask us to resend size (on Wix resize)
+window.addEventListener('message', (e) => {
+  if (e?.data?.type === 'please:resend-size') postSize();
+});
+
+// call postSize whenever UI height can change:
 const _setLanguage = setLanguage;
 setLanguage = (...args) => { _setLanguage(...args); postSize(); };
-const _afterSubmitUI = () => {             // call this where you show the thanks message
+
+// after successful submit (where you hide the button and show the thanks text)
+function showThanks() {
   document.getElementById('submitBtn').style.display = 'none';
   document.getElementById('thanks').style.display = 'block';
   postSize();
-};
+}
+// in your submit handler, replace the two lines that hide/show with: showThanks();
   </script>
 </body>
 </html>
