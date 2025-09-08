@@ -45,11 +45,13 @@
 
   /* list */
   #list{display:flex;flex-direction:column;gap:10px}
-  .item{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  /* ↓ change: make item a positioning context and allow dropdown to show */
+  .item{position:relative;background:#fff;border:1px solid var(--border);border-radius:16px;overflow:visible}
   .item.yellow{background:var(--yellow)}
   .item .head{display:grid;grid-template-columns: 150px 110px 1fr 180px 160px 140px 46px; gap:8px;align-items:center;padding:12px 14px}
   .head .mono{color:var(--muted);font-size:12px}
-  .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700}
+  .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer}
+
   .pill.red{background:var(--red); color:#a10}
   .pill.blue{background:var(--blue); color:#125}
   .pill.green{background:var(--green); color:#174d17}
@@ -151,7 +153,7 @@
   };
   const ADMIN_EMAIL = "levelscenter@gmail.com";
 
-  /* ====== INIT (safe for Wix iframes) ====== */
+  /* ====== INIT (safer for Wix iframes) ====== */
   const app = initializeApp(firebaseConfig);
   const db  = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
   const auth = getAuth(app);
@@ -172,7 +174,7 @@
   const fBranch = document.getElementById('fBranch');
   const fStatus = document.getElementById('fStatus');
 
-  /* ====== FORMS MAP (this is the piece you were missing) ====== */
+  /* ====== FORMS MAP ====== */
   const FORM_KEYS = {
     english:  "EnglishRegistration",
     art:      "ArtRegistration",
@@ -218,7 +220,7 @@
     const v = (b||"").toLowerCase();
     if (["vake","ვაკე"].includes(v)) return "Vake";
     if (["krtsanisi","კრწანისი","krtstanisi","krts"].includes(v)) return "Krtsanisi";
-    return b; // fallback as-is
+    return b;
   };
   const statusPillClass = (s)=> s==="registered" ? "green" : s==="contacted" ? "blue" : "red";
   const formatDate = (ts)=>{
@@ -230,20 +232,19 @@
   };
 
   function docFormKey(d){
-    // prefer canonical field; fall back for legacy
     return d.formKey || d.form || d.formId || "";
   }
 
-  /* ====== LOAD BADGES (count of isNew per form) ====== */
+  /* ====== BADGES = count of status: action_required ====== */
   async function refreshBadges(){
-    // Fetch per-form counts where isNew == true (if a doc has no isNew, treat as 0)
-    // To keep it simple & avoid indexes, we fetch all isNew==true and aggregate client-side.
-    const qAll = query(collection(db,"submissions"), where("isNew","==", true));
+    // Only count docs currently needing action
+    const qAll = query(collection(db,"submissions"), where("status","==","action_required"));
     const snap = await getDocs(qAll);
     const counts = { };
     snap.forEach(docSnap=>{
       const d = docSnap.data();
       const key = docFormKey(d);
+      if (!key) return;
       counts[key] = (counts[key]||0) + 1;
     });
     boxes.forEach(b=>{
@@ -273,8 +274,6 @@
     emptyEl.style.display = 'none';
     listEl.querySelectorAll('.item').forEach(n=>n.remove());
 
-    // We support both new docs (formKey) and older docs (form/formId).
-    // Make 3 simple equality queries (no orderBy => no composite indexes needed).
     const [q1, q2, q3] = [
       query(collection(db,"submissions"), where("formKey","==", activeFormKey)),
       query(collection(db,"submissions"), where("form","==", activeFormKey)),
@@ -287,10 +286,8 @@
       snap.forEach(docSnap => map.set(docSnap.id, { id:docSnap.id, ...docSnap.data() }));
     });
 
-    // Convert to array, apply filters client-side, sort by createdAt desc
     let rows = Array.from(map.values());
 
-    // Normalize helpers for UI fields
     rows = rows.map(d=>{
       const branch = normBranch(d.branch, d.branchKey);
       const status = d.status || 'action_required';
@@ -308,7 +305,6 @@
       return tb - ta;
     });
 
-    // Render
     loadEl.style.display = 'none';
     if (rows.length === 0){
       emptyEl.style.display = 'block';
@@ -317,7 +313,6 @@
     }
 
     rows.forEach(d=> renderItem(d));
-
     await refreshBadges();
   }
 
@@ -335,7 +330,6 @@
       .replace('Art','Art')
     );
 
-    // top (collapsed)
     const head = document.createElement('div');
     head.className = 'head';
     head.innerHTML = `
@@ -352,7 +346,6 @@
       <div><button class="iconBtn" data-expand="${d.id}">▼</button></div>
     `;
 
-    // status menu (positioned absolutely inside item)
     const menu = document.createElement('div');
     menu.className = 'menu';
     menu.id = 'menu-' + d.id;
@@ -362,7 +355,6 @@
       <button data-status="registered">Registered</button>
     `;
 
-    // body (expanded)
     const body = document.createElement('div');
     body.className = 'body';
     body.style.display = 'none';
@@ -385,56 +377,47 @@
       </div>
     `;
 
-    // events
-    head.querySelector(`[data-expand="${d.id}"]`).addEventListener('click', async ()=>{
+    head.querySelector(`[data-expand="${d.id}"]`).addEventListener('click', ()=>{
       const isOpen = body.style.display !== 'none';
       body.style.display = isOpen ? 'none' : 'block';
-      // mark as seen
-      if (!isOpen && d.isNew){
-        try{
-          await updateDoc(doc(db,'submissions', d.id), { isNew:false });
-          d.isNew = false;
-          await refreshBadges();
-        }catch(_){}
-      }
     });
 
-    // open status menu near pill
+    // show status menu anchored under the pill
     const pill = head.querySelector(`[data-menu-for="${d.id}"]`);
     pill.addEventListener('click', (ev)=>{
-      const rect = pill.getBoundingClientRect();
-      const host = item.getBoundingClientRect();
+      // hide any other open menus
+      document.querySelectorAll('.menu').forEach(m=>{ if(m!==menu) m.style.display='none'; });
+
+      const pillRect = pill.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      // position relative to the .item (now position:relative)
+      menu.style.left = (pillRect.left - itemRect.left) + 'px';
+      menu.style.top  = (pillRect.bottom - itemRect.top + 6) + 'px';
       menu.style.display = 'block';
-      menu.style.left = (rect.left - host.left) + 'px';
-      menu.style.top  = (rect.bottom - host.top + 6) + 'px';
     });
 
-    // choose status
+    // choose status -> update doc, badge refresh, bg color update
     menu.querySelectorAll('button').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
         const newStatus = btn.getAttribute('data-status');
         try{
-          await updateDoc(doc(db,'submissions', d.id), { status:newStatus, isNew:false });
-          d._status = newStatus; d.isNew = false;
-          // update pill
+          await updateDoc(doc(db,'submissions', d.id), { status:newStatus });
+          d._status = newStatus;
           pill.className = 'pill ' + statusPillClass(newStatus);
           pill.textContent = newStatus==='registered' ? 'Registered' : newStatus==='contacted' ? 'Contacted' : 'Action required';
-          // background reset if not action required
           item.classList.toggle('yellow', newStatus==='action_required');
           menu.style.display = 'none';
-          await refreshBadges();
+          await refreshBadges(); // reflect counts for action_required
         }catch(err){ alert('Failed to update status\n\n'+(err?.message||err)); }
       });
     });
 
-    // close menu if clicked outside
     document.addEventListener('click', (e)=>{
       if (!menu.contains(e.target) && !pill.contains(e.target)){
         menu.style.display = 'none';
       }
     });
 
-    // delete
     body.querySelector(`[data-del="${d.id}"]`).addEventListener('click', async ()=>{
       if (!confirm('Delete this submission?')) return;
       try{
@@ -453,4 +436,5 @@
 </script>
 </body>
 </html>
+
 
