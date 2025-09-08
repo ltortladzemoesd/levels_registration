@@ -328,12 +328,26 @@
   /* expand / delete / status menu */
   const menu = $('#statusMenu'); let menuAnchor=null;
   function openMenu(anchor, _current, id){
-  const r = anchor.getBoundingClientRect();
+  // show first so we can measure its size
   menu.dataset.id = id;
-  menu.style.left = `${r.left + window.scrollX}px`;
-  menu.style.top  = `${r.bottom + 6 + window.scrollY}px`;
   menu.style.display = 'block';
+
+  const r  = anchor.getBoundingClientRect();
+  const mw = menu.offsetWidth;
+  const mh = menu.offsetHeight;
+
+  // position relative to the viewport (fixed)
+  let left = r.left;          // align to pill's left
+  let top  = r.bottom + 8;    // a little gap under the pill
+
+  // keep inside the viewport
+  left = Math.max(8, Math.min(left, window.innerWidth  - mw - 8));
+  top  = Math.max(8, Math.min(top,  window.innerHeight - mh - 8));
+
+  menu.style.left = left + 'px';
+  menu.style.top  = top  + 'px';
 }
+
 function closeMenu(){
   menu.style.display = 'none';
   menu.style.left = '-9999px';
