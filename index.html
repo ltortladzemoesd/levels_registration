@@ -1,156 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Levels Admin Panel</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Panel</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;700;800&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --bg:#f6f8fa; --card:#fff; --ink:#0f1f28; --muted:#64748b;
-    --chip:#e2e8f0; --chip-ink:#0f1f28;
-    --btn:#233e57; --btn-ink:#fff; --hover:#e9f5f2;
-    --red:#ef4444; --amber:#f59e0b; --green:#16a34a; --blue:#2563eb;
-    --radius:16px; --radius-lg:22px; --shadow:0 10px 24px rgba(0,0,0,.08);
+    --bg:#f7f9fb; --card:#ffffff; --ink:#0f1f28; --muted:#5a6b7b;
+    --pill:#e8eef5; --border:#e6ebf0; --brand:#233e57;
+    --yellow:#fff6cf; --green:#e8f6e9; --blue:#e7f0ff; --red:#ffe8e8;
+    --radius:18px; --shadow:0 10px 24px rgba(0,0,0,.06);
   }
-  *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Red Hat Display", system-ui,-apple-system,Segoe UI,Roboto,Arial}
-  .wrap{max-width:1200px;margin:28px auto;padding:0 16px}
-  .toolbar{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:18px 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-  .toolbar .who{font-weight:600;margin-right:auto}
-  select,input[type="date"]{background:#f1f5f9;border:none;border-radius:12px;padding:10px 12px;font-size:14px}
-  button{border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .btn{background:var(--btn);color:var(--btn-ink)}
-  .muted{color:var(--muted)}
-  .cards{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:18px}
-  .card{grid-column:1/-1;background:var(--card);box-shadow:var(--shadow);border-radius:var(--radius-lg);padding:0}
-  .row{padding:16px 18px;border-top:1px solid #eef2f7}
-  .row:first-child{border-top:none}
-  .header{display:grid;grid-template-columns: 170px 110px 220px 200px 1fr 150px;gap:12px;padding:14px 18px;font-weight:700;color:var(--muted)}
-  .item{display:grid;grid-template-columns: 170px 110px 220px 200px 1fr 150px;gap:12px;align-items:center;padding:10px 18px;border-top:1px solid #eef2f7;cursor:pointer;transition:background .15s}
-  .item:hover{background:#fafbfc}
-  .item.alert{background:#fff7e6}
-  .name{font-weight:800}
-  .status-pill{justify-self:end}
-  .pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;font-weight:800;font-size:13px}
-  .pill.amber{background:#fff1c7;color:#b45309}
-  .pill.blue{background:#dbeafe;color:#1d4ed8}
-  .pill.green{background:#dcfce7;color:#166534}
-  .pill.gray{background:#e2e8f0;color:#111827}
-  .details{padding:12px 18px 18px 18px;border-top:1px dashed #e5e7eb}
-  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-  .kv{background:#f8fafc;border-radius:12px;padding:12px}
-  .kv .t{color:var(--muted);font-weight:700;font-size:13px;margin-bottom:4px}
-  .kv .v{font-weight:700}
-  .actions{display:flex;gap:10px;margin-top:12px}
-  .danger{background:#fee2e2;color:#991b1b}
-  .dropdown{position:relative;display:inline-block}
-  .menu{position:absolute;z-index:50;right:0;top:100%;margin-top:6px;background:#fff;border-radius:12px;box-shadow:var(--shadow);min-width:180px;display:none;overflow:hidden}
-  .menu.show{display:block}
-  .menu button{display:block;width:100%;background:#fff;color:#111827;text-align:left;border-radius:0;padding:10px 12px}
-  .menu button:hover{background:#f1f5f9}
-  .badge{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:6px 10px;font-size:12px}
-  .badge .dot{width:8px;height:8px;border-radius:999px;background:var(--amber)}
-  .form-tabs{display:flex;gap:10px;margin:16px 0 8px 0}
-  .tab{background:#eef2f7;border:none;border-radius:12px;padding:8px 12px;cursor:pointer}
-  .tab.active{background:#dbeafe;color:#1d4ed8;font-weight:800}
-  .center{display:flex;justify-content:center;align-items:center;padding:24px}
-  .login{max-width:380px;margin:64px auto;background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:22px}
-  .login h1{margin:0 0 8px 0}
-  .login .row{display:flex;flex-direction:column;gap:6px;border-top:none}
-  .login input{width:100%}
-  .error{color:#b91c1c;font-weight:700}
-  .errbar{display:none;margin:12px 0;padding:12px 14px;border-radius:12px;background:#fef2f2;color:#991b1b;font-weight:700}
-  .errbar a{color:#991b1b;text-decoration:underline}
+  *{box-sizing:border-box} html,body{margin:0;height:100%}
+  body{font-family:"Red Hat Display",ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--ink)}
+
+  .wrap{max-width:1100px;margin:24px auto;padding:16px}
+
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+
+  /* login */
+  #loginView{max-width:440px;margin:60px auto}
+  #loginView h1{margin:0 0 12px}
+  .input{width:100%;border:1px solid var(--border);border-radius:14px;padding:12px 14px;font-size:15px;margin:8px 0}
+  .btn{border:none;border-radius:14px;padding:12px 16px;font-weight:800;background:var(--brand);color:#fff;cursor:pointer}
+  .btn[disabled]{opacity:.7;cursor:progress}
+  .row{display:flex;gap:12px;align-items:center;justify-content:space-between}
+
+  /* header */
+  #appHeader{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+  #filters{display:flex;gap:10px;align-items:center}
+  select{border:1px solid var(--border);border-radius:12px;padding:8px 12px;background:#fff}
+
+  /* form boxes */
+  .boxes{display:grid;grid-template-columns: repeat(5, 1fr); gap:12px;margin-bottom:16px}
+  .box{position:relative;border:1px solid var(--border);border-radius:16px;padding:16px;cursor:pointer;user-select:none;background:#fff;transition:transform .08s}
+  .box:hover{transform:translateY(-1px)}
+  .box.active{outline:2px solid var(--brand)}
+  .box h3{margin:0 0 6px;font-size:16px}
+  .tag{display:inline-block;background:var(--pill);color:var(--muted);border-radius:999px;padding:3px 10px;font-size:12px}
+  .badge{position:absolute;top:8px;right:8px;min-width:18px;height:18px;padding:0 6px;border-radius:999px;background:#e44; color:#fff; font-size:12px; display:flex;align-items:center;justify-content:center}
+
+  /* list */
+  #list{display:flex;flex-direction:column;gap:10px}
+  .item{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  .item.yellow{background:var(--yellow)}
+  .item .head{display:grid;grid-template-columns: 150px 110px 1fr 180px 160px 140px 46px; gap:8px;align-items:center;padding:12px 14px}
+  .head .mono{color:var(--muted);font-size:12px}
+  .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700}
+  .pill.red{background:var(--red); color:#a10}
+  .pill.blue{background:var(--blue); color:#125}
+  .pill.green{background:var(--green); color:#174d17}
+
+  .item .body{padding:14px;border-top:1px dashed var(--border)}
+  .bodyGrid{display:grid;grid-template-columns: repeat(4, 1fr);gap:12px}
+  .field{background:#fafcff;border:1px solid var(--border);border-radius:12px;padding:10px}
+  .field b{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+
+  .iconBtn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:6px 10px;cursor:pointer}
+  .actions{display:flex;gap:10px;align-items:center}
+
+  /* status menu */
+  .menu{position:absolute;z-index:50;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:6px;display:none}
+  .menu button{display:block;width:100%;text-align:left;background:none;border:none;padding:8px 10px;border-radius:10px;cursor:pointer}
+  .menu button:hover{background:#f3f6fb}
+
+  .empty{padding:26px;text-align:center;color:var(--muted)}
+  .loading{padding:26px;text-align:center}
+  @media (max-width:950px){ .boxes{grid-template-columns: repeat(2, 1fr)} .item .head{grid-template-columns: 120px 90px 1fr 160px 140px 120px 40px} }
+  @media (max-width:650px){ .boxes{grid-template-columns: 1fr} .bodyGrid{grid-template-columns: 1fr} }
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
-  <!-- Login -->
-  <div id="loginView" class="login" style="display:none">
+<div class="wrap">
+
+  <!-- LOGIN VIEW -->
+  <div id="loginView" class="card" style="display:none;">
     <h1>Admin sign in</h1>
-    <div class="muted">Use your Firebase email & password</div>
+    <input id="email" class="input" type="email" placeholder="Email" />
+    <input id="password" class="input" type="password" placeholder="Password" />
     <div class="row">
-      <label>Email</label>
-      <input id="loginEmail" type="email" placeholder="you@example.com"/>
-    </div>
-    <div class="row">
-      <label>Password</label>
-      <input id="loginPass" type="password" placeholder="********"/>
-    </div>
-    <div class="row" style="gap:10px">
-      <button class="btn" id="loginBtn">Sign in</button>
-      <div class="error" id="loginErr" style="display:none"></div>
+      <button id="loginBtn" class="btn">Sign in</button>
+      <div id="loginErr" style="color:#c33;font-size:13px;"></div>
     </div>
   </div>
 
-  <!-- Main -->
-  <div id="mainView" style="display:none">
-    <div class="toolbar">
-      <div class="who" id="whoBox">Signed in</div>
-
-      <div class="badge" id="allNewBadge" title="Items needing action across all forms">
-        <span class="dot"></span><span id="allNewCount">0</span>
-      </div>
-
-      <select id="branchSel">
-        <option value="">All branches</option>
-        <option value="vake">Vake</option>
-        <option value="krtsanisi">Krtsanisi</option>
-      </select>
-
-      <select id="statusSel">
-        <option value="">All statuses</option>
-        <option value="action_required">Action required</option>
-        <option value="contacted">Contacted</option>
-        <option value="registered">Registered</option>
-      </select>
-
-      <input id="fromDate" type="date"/>
-      <input id="toDate" type="date"/>
-
-      <button class="btn" id="applyBtn">Apply</button>
-      <button id="resetBtn">Reset</button>
-      <button id="signOutBtn">Sign out</button>
-    </div>
-
-    <div id="errbar" class="errbar"></div>
-
-    <div class="form-tabs">
-      <button class="tab active" data-form="">All</button>
-      <button class="tab" data-form="EnglishRegistration">English</button>
-      <button class="tab" data-form="ArtRegistration">Art</button>
-      <button class="tab" data-form="SummerSchool">Summer school</button>
-      <button class="tab" data-form="StudyAbroad">Study abroad</button>
-      <button class="tab" data-form="CorporateEnroll">Corporate</button>
-    </div>
-
-    <div class="cards">
-      <div class="card">
-        <div class="header">
-          <div>Created</div>
-          <div>Branch</div>
-          <div>Name</div>
-          <div>Form</div>
-          <div>Course / School</div>
-          <div class="status-pill">Status</div>
+  <!-- APP VIEW -->
+  <div id="appView" style="display:none;">
+    <div id="appHeader">
+      <div style="font-weight:800;font-size:20px;">Submissions</div>
+      <div class="row">
+        <div id="filters">
+          <label>Branch:
+            <select id="fBranch">
+              <option value="ALL">All</option>
+              <option value="Vake">Vake</option>
+              <option value="Krtsanisi">Krtsanisi</option>
+            </select>
+          </label>
+          <label>Status:
+            <select id="fStatus">
+              <option value="ALL">All</option>
+              <option value="action_required">Action required</option>
+              <option value="contacted">Contacted</option>
+              <option value="registered">Registered</option>
+            </select>
+          </label>
         </div>
-        <div id="list"></div>
-        <div id="empty" class="center muted" style="display:none">No results.</div>
+        <button id="logoutBtn" class="iconBtn">Sign out</button>
       </div>
+    </div>
+
+    <!-- FORM BOXES -->
+    <div class="boxes">
+      <div class="box" data-form="EnglishRegistration"><h3>English</h3><span class="tag">Registration</span><span class="badge" style="display:none;"></span></div>
+      <div class="box" data-form="ArtRegistration"><h3>Art</h3><span class="tag">Registration</span><span class="badge" style="display:none;"></span></div>
+      <div class="box" data-form="SummerSchoolRegistration"><h3>Summer school</h3><span class="tag">Registration</span><span class="badge" style="display:none;"></span></div>
+      <div class="box" data-form="StudyAbroadRegistration"><h3>Study abroad</h3><span class="tag">Registration</span><span class="badge" style="display:none;"></span></div>
+      <div class="box" data-form="CorporateRegistration"><h3>Corporate</h3><span class="tag">Enrollment</span><span class="badge" style="display:none;"></span></div>
+    </div>
+
+    <!-- LIST -->
+    <div id="list" class="card">
+      <div id="loading" class="loading">Loading…</div>
+      <div id="empty" class="empty" style="display:none;">No submissions yet.</div>
     </div>
   </div>
 </div>
 
-<!-- Firebase -->
+<!-- Firebase via CDN modules -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs, updateDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+  import {
+    initializeFirestore, collection, getDocs, query, where, doc, updateDoc, deleteDoc
+  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+  import {
+    getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-  /* ===== Firebase config ===== */
+  /* ====== CONFIG ====== */
   const firebaseConfig = {
     apiKey: "AIzaSyB-vfjAb9matVnpO6BVc3xBoFHnT_xXfH0",
     authDomain: "levels-registration.firebaseapp.com",
@@ -159,327 +149,306 @@
     messagingSenderId: "883788306190",
     appId: "1:883788306190:web:1da45dc034cca9edefa95f"
   };
+  const ADMIN_EMAIL = "levelscenter@gmail.com";
+
+  /* ====== INIT (safe for Wix iframes) ====== */
   const app = initializeApp(firebaseConfig);
+  const db  = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
   const auth = getAuth(app);
-  const db = getFirestore(app);
 
-  /* ===== Helpers ===== */
-  const BRANCH_MAP = { 'vake':'Vake','krtsanisi':'Krtsanisi','ვაკე':'Vake','კრწანისი':'Krtsanisi' };
-  const BRANCH_KEY = { 'Vake':'vake','Krtsanisi':'krtsanisi','ვაკე':'vake','კრწანისი':'krtsanisi' };
-  const FORM_LABEL = {
-    EnglishRegistration:'English registration',
-    ArtRegistration:'Art registration',
-    SummerSchool:'Summer school',
-    StudyAbroad:'Study abroad',
-    CorporateEnroll:'Corporate'
-  };
-  const toDateStr = (ts) => {
-    if (!ts) return '';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    return d.toLocaleString();
-  };
-  const pill = (status) => {
-    if(status==='registered') return '<span class="pill green">Registered</span>';
-    if(status==='contacted') return '<span class="pill blue">Contacted</span>';
-    return '<span class="pill amber">Action required</span>';
-  };
-
-  const errbar = document.getElementById('errbar');
-  const showError = (msg, link) => {
-    errbar.innerHTML = link ? `${msg} — <a href="${link}" target="_blank" rel="noopener">Create index</a>` : msg;
-    errbar.style.display = 'block';
-  };
-  const clearError = () => { errbar.style.display = 'none'; errbar.textContent = ''; };
-
-  /* ===== State ===== */
-  let activeForm = '';          // '' = All
-  let branchSel = '';           // '' = All
-  let statusSel = '';           // '' = All
-  let fromDate = '';            // '' = none
-  let toDate = '';              // '' = none
-
-  /* ===== UI refs ===== */
+  /* ====== UI HOOKS ====== */
   const loginView = document.getElementById('loginView');
-  const mainView  = document.getElementById('mainView');
+  const appView   = document.getElementById('appView');
+  const emailEl   = document.getElementById('email');
+  const passEl    = document.getElementById('password');
   const loginBtn  = document.getElementById('loginBtn');
   const loginErr  = document.getElementById('loginErr');
-  const whoBox    = document.getElementById('whoBox');
-  const listEl    = document.getElementById('list');
-  const emptyEl   = document.getElementById('empty');
-  const allNewCount = document.getElementById('allNewCount');
+  const logoutBtn = document.getElementById('logoutBtn');
 
-  /* ===== Auth flow ===== */
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      mainView.style.display='none';
-      loginView.style.display='block';
-      return;
-    }
-    // check admin
-    const email = (user.email||'').toLowerCase();
-    const adminDoc = await getDoc(doc(db,'admins',email));
-    if (!adminDoc.exists() || (adminDoc.data().role!=='admin')) {
-      mainView.style.display='none';
-      loginView.style.display='block';
-      loginErr.style.display='block';
-      loginErr.textContent = `You are not authorized (missing /admins/${email} with role "admin").`;
-      await signOut(auth);
-      return;
-    }
-    loginView.style.display='none';
-    mainView.style.display='block';
-    whoBox.textContent = `Signed in as ${email} (admin)`;
-    await refreshCounts();
-    await load();  // initial load
-  });
+  const boxes   = Array.from(document.querySelectorAll('.box'));
+  const listEl  = document.getElementById('list');
+  const emptyEl = document.getElementById('empty');
+  const loadEl  = document.getElementById('loading');
+  const fBranch = document.getElementById('fBranch');
+  const fStatus = document.getElementById('fStatus');
 
-  loginBtn.onclick = async () => {
-    loginErr.style.display='none';
-    const email = (document.getElementById('loginEmail').value||'').trim();
-    const pass  = document.getElementById('loginPass').value||'';
-    try{
-      await signInWithEmailAndPassword(auth,email,pass);
-    }catch(e){
-      loginErr.style.display='block';
-      loginErr.textContent = e.message || String(e);
-    }
-  };
-  document.getElementById('signOutBtn').onclick = ()=>signOut(auth);
-
-  /* ===== Filters / Tabs ===== */
-  document.querySelectorAll('.tab').forEach(b=>{
-    b.addEventListener('click', async ()=>{
-      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-      b.classList.add('active');
-      activeForm = b.dataset.form || '';
-      await load();
-    });
-  });
-
-  document.getElementById('applyBtn').onclick = async () => {
-    branchSel = document.getElementById('branchSel').value || '';
-    statusSel = document.getElementById('statusSel').value || '';
-    fromDate  = document.getElementById('fromDate').value || '';
-    toDate    = document.getElementById('toDate').value || '';
-    await load();
-  };
-  document.getElementById('resetBtn').onclick = async () => {
-    document.getElementById('branchSel').value='';
-    document.getElementById('statusSel').value='';
-    document.getElementById('fromDate').value='';
-    document.getElementById('toDate').value='';
-    branchSel=statusSel=fromDate=toDate='';
-    await load();
+  /* ====== FORMS MAP (this is the piece you were missing) ====== */
+  const FORM_KEYS = {
+    english:  "EnglishRegistration",
+    art:      "ArtRegistration",
+    summer:   "SummerSchoolRegistration",
+    abroad:   "StudyAbroadRegistration",
+    corporate:"CorporateRegistration",
   };
 
-  /* ===== Queries (safe for legacy docs) ===== */
-  function toTSStart(iso){ return iso ? Timestamp.fromDate(new Date(iso+'T00:00:00')) : null; }
-  function toTSEnd(iso){   return iso ? Timestamp.fromDate(new Date(iso+'T23:59:59')) : null; }
-  function inRange(ts, fromTS, toTS){
-    if (!ts) return true;
-    const s = ts.seconds || Math.floor((new Date(ts)).getTime()/1000);
-    if (fromTS && s < fromTS.seconds) return false;
-    if (toTS && s > toTS.seconds) return false;
-    return true;
-    }
+  // active selection
+  let activeFormKey = FORM_KEYS.english; // default view
 
-  async function runQuery(formKey, branchKey, status, fromISO, toISO, pageLimit=300){
-    const col = collection(db,'submissions');
-    const fromTS = toTSStart(fromISO);
-    const toTS   = toTSEnd(toISO);
-
-    // --- NEW documents (formKey/branchKey) - fully indexed and fast
-    const newWhere = [];
-    if (formKey)   newWhere.push(['formKey','==',formKey]);
-    if (branchKey) newWhere.push(['branchKey','==',branchKey]);
-    if (status)    newWhere.push(['status','==',status]);
-
-    let qNew = query(col);
-    newWhere.forEach(w => qNew = query(qNew, where(...w)));
-    if (fromTS) qNew = query(qNew, where('createdAt','>=',fromTS));
-    if (toTS)   qNew = query(qNew, where('createdAt','<=',toTS));
-    qNew = query(qNew, orderBy('createdAt','desc'), limit(pageLimit));
-
-    // --- LEGACY documents (formId/branch) - avoid composite indexes
-    // We fetch with 0 or 1 equality filter and then filter client-side.
-    const legacyPromises = [];
-    if (formKey){
-      legacyPromises.push(getDocs(query(col, where('formId','==',formKey), limit(pageLimit))));
-    }else if (branchKey){
-      const labels = branchKey==='vake' ? ['Vake','ვაკე'] : ['Krtsanisi','კრწანისი'];
-      for (const b of labels){
-        legacyPromises.push(getDocs(query(col, where('branch','==',b), limit(pageLimit))));
-      }
+  /* ====== AUTH ====== */
+  onAuthStateChanged(auth, (user)=>{
+    if(user && user.email === ADMIN_EMAIL){
+      loginView.style.display = 'none';
+      appView.style.display = 'block';
+      refreshBadges();
+      loadList();
     }else{
-      // All forms, no branch filter — pull a recent window by status if set, else by createdAt.
-      if (status){
-        legacyPromises.push(getDocs(query(col, where('status','==',status), limit(pageLimit))));
-      }else{
-        // no filters -> keep reads sane by ordering + limiting
-        legacyPromises.push(getDocs(query(col, orderBy('createdAt','desc'), limit(pageLimit))));
-      }
+      appView.style.display = 'none';
+      loginView.style.display = 'block';
     }
+  });
 
-    const out = [];
-    const seen = new Set();
-
-    // Fetch new docs (will throw if a rare index is still missing)
+  loginBtn.addEventListener('click', async ()=>{
+    loginErr.textContent = '';
+    loginBtn.disabled = true;
     try{
-      const snap = await getDocs(qNew);
-      snap.forEach(d=>{
-        if (seen.has(d.id)) return; seen.add(d.id);
-        out.push({id:d.id, ...d.data()});
-      });
-    }catch(e){
-      // Surface the index link if present but still continue with legacy results
-      const link = e?.message?.includes('https://console.firebase.google.com') ? e.message.match(/https:[^\s)]+/)[0] : '';
-      showError('Some results need a new index for faster queries.', link);
+      await signInWithEmailAndPassword(auth, emailEl.value.trim(), passEl.value);
+    }catch(err){
+      loginErr.textContent = err?.message || String(err);
+    }finally{
+      loginBtn.disabled = false;
     }
+  });
 
-    // Fetch legacy sets and filter client-side
-    const snaps = await Promise.allSettled(legacyPromises);
-    const fromR = fromTS?.seconds, toR = toTS?.seconds;
-    const wantBranchLabels = branchKey ? (branchKey==='vake' ? ['Vake','ვაკე'] : ['Krtsanisi','კრწანისი']) : null;
+  logoutBtn.addEventListener('click', ()=> signOut(auth));
 
-    for (const s of snaps){
-      if (s.status !== 'fulfilled') continue;
-      s.value.forEach(d=>{
-        if (seen.has(d.id)) return;
-        const v = d.data();
-        // form filter
-        if (formKey && !(v.formId===formKey)) return;
-        // status filter
-        if (status && v.status!==status) return;
-        // branch filter on legacy labels
-        if (wantBranchLabels && !wantBranchLabels.includes(v.branch)) return;
-        // date filter
-        const secs = v.createdAt?.seconds;
-        if (fromR && (!secs || secs < fromR)) return;
-        if (toR && (!secs || secs > toR)) return;
-
-        seen.add(d.id);
-        out.push({id:d.id, ...v});
-      });
-    }
-
-    // final sort newest first
-    out.sort((a,b)=> (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
-    return out;
-  }
-
-  async function refreshCounts(){
-    // fast count: new+legacy share 'status'
-    const col = collection(db,'submissions');
-    const snap = await getDocs(query(col, where('status','==','action_required'), orderBy('createdAt','desc'), limit(200)));
-    allNewCount.textContent = snap.size || 0;
-  }
-
-  async function load(){
-    clearError();
-    listEl.innerHTML = '<div class="center muted">Loading…</div>';
+  /* ====== HELPERS ====== */
+  const normBranch = (b, bk) => {
+    if (bk === "Vake" || bk === "Krtsanisi" || bk === "-") return bk;
+    if (!b) return "-";
+    const v = (b||"").toLowerCase();
+    if (["vake","ვაკე"].includes(v)) return "Vake";
+    if (["krtsanisi","კრწანისი","krtstanisi","krts"].includes(v)) return "Krtsanisi";
+    return b; // fallback as-is
+  };
+  const statusPillClass = (s)=> s==="registered" ? "green" : s==="contacted" ? "blue" : "red";
+  const formatDate = (ts)=>{
+    if (!ts) return "-";
     try{
-      const rows = await runQuery(activeForm, (branchSel||''), (statusSel||''), fromDate, toDate);
-      render(rows);
-    }catch(e){
-      const link = e?.message?.includes('https://console.firebase.google.com') ? e.message.match(/https:[^\s)]+/)[0] : '';
-      showError('Query failed.', link);
-      render([]); // at least clear the loader
-    }
+      const d = ts.toDate ? ts.toDate() : new Date(ts.seconds ? ts.seconds*1000 : ts);
+      return d.toLocaleString();
+    }catch{ return "-"; }
+  };
+
+  function docFormKey(d){
+    // prefer canonical field; fall back for legacy
+    return d.formKey || d.form || d.formId || "";
   }
 
-  /* ===== Render ===== */
-  function render(rows){
-    if (!rows.length){
-      listEl.innerHTML = '';
-      emptyEl.style.display='block';
+  /* ====== LOAD BADGES (count of isNew per form) ====== */
+  async function refreshBadges(){
+    // Fetch per-form counts where isNew == true (if a doc has no isNew, treat as 0)
+    // To keep it simple & avoid indexes, we fetch all isNew==true and aggregate client-side.
+    const qAll = query(collection(db,"submissions"), where("isNew","==", true));
+    const snap = await getDocs(qAll);
+    const counts = { };
+    snap.forEach(docSnap=>{
+      const d = docSnap.data();
+      const key = docFormKey(d);
+      counts[key] = (counts[key]||0) + 1;
+    });
+    boxes.forEach(b=>{
+      const key = b.getAttribute('data-form');
+      const badge = b.querySelector('.badge');
+      const n = counts[key] || 0;
+      badge.style.display = n>0 ? 'flex' : 'none';
+      badge.textContent = n;
+      b.classList.toggle('active', key===activeFormKey);
+    });
+  }
+
+  /* ====== LOAD LIST ====== */
+  fBranch.addEventListener('change', loadList);
+  fStatus.addEventListener('change', loadList);
+
+  boxes.forEach(b=>{
+    b.addEventListener('click', ()=>{
+      activeFormKey = b.getAttribute('data-form');
+      boxes.forEach(x=> x.classList.toggle('active', x===b));
+      loadList();
+    });
+  });
+
+  async function loadList(){
+    loadEl.style.display = 'block';
+    emptyEl.style.display = 'none';
+    listEl.querySelectorAll('.item').forEach(n=>n.remove());
+
+    // We support both new docs (formKey) and older docs (form/formId).
+    // Make 3 simple equality queries (no orderBy => no composite indexes needed).
+    const [q1, q2, q3] = [
+      query(collection(db,"submissions"), where("formKey","==", activeFormKey)),
+      query(collection(db,"submissions"), where("form","==", activeFormKey)),
+      query(collection(db,"submissions"), where("formId","==", activeFormKey)),
+    ];
+
+    const [s1, s2, s3] = await Promise.all([getDocs(q1), getDocs(q2), getDocs(q3)]);
+    const map = new Map();
+    [s1,s2,s3].forEach(snap=>{
+      snap.forEach(docSnap => map.set(docSnap.id, { id:docSnap.id, ...docSnap.data() }));
+    });
+
+    // Convert to array, apply filters client-side, sort by createdAt desc
+    let rows = Array.from(map.values());
+
+    // Normalize helpers for UI fields
+    rows = rows.map(d=>{
+      const branch = normBranch(d.branch, d.branchKey);
+      const status = d.status || 'action_required';
+      return { ...d, _branch: branch, _status: status };
+    });
+
+    const br = fBranch.value;
+    const st = fStatus.value;
+    if (br !== 'ALL') rows = rows.filter(r=> r._branch === br || r._branch === '-' );
+    if (st !== 'ALL') rows = rows.filter(r=> r._status === st);
+
+    rows.sort((a,b)=>{
+      const ta = a.createdAt?.toMillis?.() ?? 0;
+      const tb = b.createdAt?.toMillis?.() ?? 0;
+      return tb - ta;
+    });
+
+    // Render
+    loadEl.style.display = 'none';
+    if (rows.length === 0){
+      emptyEl.style.display = 'block';
+      await refreshBadges();
       return;
     }
-    emptyEl.style.display='none';
-    const html = rows.map(r=>{
-      const created = toDateStr(r.createdAt);
-      const branch  = r.branchKey ? (BRANCH_MAP[r.branchKey]||r.branchKey) : (r.branch||'');
-      const name    = [r.firstName,r.lastName].filter(Boolean).join(' ');
-      const formLbl = FORM_LABEL[r.formKey||r.formId] || (r.form || (r.formId||r.formKey||''));
-      const course  = r.course || r.school || '';
-      const alert   = (r.status||'action_required')==='action_required' ? 'alert' : '';
-      return `
-        <div class="item ${alert}" data-id="${r.id}">
-          <div>${created||''}</div>
-          <div>${branch||''}</div>
-          <div class="name">${name||''}</div>
-          <div>${formLbl}</div>
-          <div>${course||''}</div>
-          <div class="status-pill">${pill(r.status||'action_required')}</div>
-        </div>
-        <div class="details" id="det-${r.id}" style="display:none">
-          <div class="grid">
-            <div class="kv"><div class="t">Email</div><div class="v">${r.email||''}</div></div>
-            <div class="kv"><div class="t">Phone</div><div class="v">${r.phoneE164||''}</div></div>
-            <div class="kv"><div class="t">Age</div><div class="v">${(r.age??'')}</div></div>
-            <div class="kv" style="grid-column:1/-1">
-              <div class="t">Message</div><div class="v">${r.message||''}</div>
-            </div>
-          </div>
-          <div class="actions">
-            <div class="dropdown">
-              <button class="pill gray" data-dd="${r.id}">Change status ▾</button>
-              <div class="menu" id="menu-${r.id}">
-                <button data-set="action_required" data-for="${r.id}">Action required</button>
-                <button data-set="contacted" data-for="${r.id}">Contacted</button>
-                <button data-set="registered" data-for="${r.id}">Registered</button>
-              </div>
-            </div>
-            <button class="danger" data-del="${r.id}">Delete</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-    listEl.innerHTML = html;
 
-    // expand/collapse
-    listEl.querySelectorAll('.item').forEach(el=>{
-      el.addEventListener('click', ()=>{
-        const id = el.dataset.id;
-        const det = document.getElementById('det-'+id);
-        det.style.display = det.style.display==='none' ? 'block' : 'none';
+    rows.forEach(d=> renderItem(d));
+
+    await refreshBadges();
+  }
+
+  /* ====== RENDER ITEM ====== */
+  function renderItem(d){
+    const item = document.createElement('div');
+    item.className = 'item' + (d._status==='action_required' ? ' yellow' : '');
+
+    const formName = (docFormKey(d)
+      .replace('Registration','')
+      .replace('Corporate','Corporate')
+      .replace('SummerSchool','Summer School')
+      .replace('StudyAbroad','Study Abroad')
+      .replace('English','English')
+      .replace('Art','Art')
+    );
+
+    // top (collapsed)
+    const head = document.createElement('div');
+    head.className = 'head';
+    head.innerHTML = `
+      <div class="mono">${formatDate(d.createdAt)}</div>
+      <div>${d._branch || '-'}</div>
+      <div><b>${(d.firstName||'-')} ${(d.lastName||'')}</b></div>
+      <div>${formName || '-'}</div>
+      <div>${d.course || d.school || '-'}</div>
+      <div>
+        <span class="pill ${statusPillClass(d._status)}" data-menu-for="${d.id}">
+          ${d._status === 'registered' ? 'Registered' : d._status === 'contacted' ? 'Contacted' : 'Action required'}
+        </span>
+      </div>
+      <div><button class="iconBtn" data-expand="${d.id}">▼</button></div>
+    `;
+
+    // status menu (positioned absolutely inside item)
+    const menu = document.createElement('div');
+    menu.className = 'menu';
+    menu.id = 'menu-' + d.id;
+    menu.innerHTML = `
+      <button data-status="action_required">Action required</button>
+      <button data-status="contacted">Contacted</button>
+      <button data-status="registered">Registered</button>
+    `;
+
+    // body (expanded)
+    const body = document.createElement('div');
+    body.className = 'body';
+    body.style.display = 'none';
+    body.innerHTML = `
+      <div class="bodyGrid">
+        <div class="field"><b>Email</b><div>${d.email||'-'}</div></div>
+        <div class="field"><b>Phone</b><div>${d.phoneE164||'-'}</div></div>
+        <div class="field"><b>Language</b><div>${d.lang||'-'}</div></div>
+        <div class="field"><b>Age</b><div>${d.age ?? '-'}</div></div>
+
+        <div class="field"><b>Branch</b><div>${d._branch || '-'}</div></div>
+        <div class="field"><b>Course / School</b><div>${d.course || d.school || '-'}</div></div>
+        <div class="field"><b>Form</b><div>${formName || '-'}</div></div>
+        <div class="field"><b>Created</b><div>${formatDate(d.createdAt)}</div></div>
+
+        <div class="field" style="grid-column:1 / -1;"><b>Message</b><div>${(d.message||'-').replace(/\n/g,'<br>')}</div></div>
+      </div>
+      <div class="actions" style="margin-top:10px">
+        <button class="iconBtn" data-del="${d.id}">Delete</button>
+      </div>
+    `;
+
+    // events
+    head.querySelector(`[data-expand="${d.id}"]`).addEventListener('click', async ()=>{
+      const isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      // mark as seen
+      if (!isOpen && d.isNew){
+        try{
+          await updateDoc(doc(db,'submissions', d.id), { isNew:false });
+          d.isNew = false;
+          await refreshBadges();
+        }catch(_){}
+      }
+    });
+
+    // open status menu near pill
+    const pill = head.querySelector(`[data-menu-for="${d.id}"]`);
+    pill.addEventListener('click', (ev)=>{
+      const rect = pill.getBoundingClientRect();
+      const host = item.getBoundingClientRect();
+      menu.style.display = 'block';
+      menu.style.left = (rect.left - host.left) + 'px';
+      menu.style.top  = (rect.bottom - host.top + 6) + 'px';
+    });
+
+    // choose status
+    menu.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const newStatus = btn.getAttribute('data-status');
+        try{
+          await updateDoc(doc(db,'submissions', d.id), { status:newStatus, isNew:false });
+          d._status = newStatus; d.isNew = false;
+          // update pill
+          pill.className = 'pill ' + statusPillClass(newStatus);
+          pill.textContent = newStatus==='registered' ? 'Registered' : newStatus==='contacted' ? 'Contacted' : 'Action required';
+          // background reset if not action required
+          item.classList.toggle('yellow', newStatus==='action_required');
+          menu.style.display = 'none';
+          await refreshBadges();
+        }catch(err){ alert('Failed to update status\n\n'+(err?.message||err)); }
       });
     });
 
-    // dropdown status menus
-    listEl.querySelectorAll('[data-dd]').forEach(btn=>{
-      btn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        const id = btn.getAttribute('data-dd');
-        document.getElementById('menu-'+id).classList.toggle('show');
-      });
-    });
-    document.addEventListener('click', ()=>{
-      document.querySelectorAll('.menu.show').forEach(m=> m.classList.remove('show'));
-    });
-
-    // set status
-    listEl.querySelectorAll('[data-set]').forEach(b=>{
-      b.addEventListener('click', async (e)=>{
-        e.stopPropagation();
-        const id = b.getAttribute('data-for');
-        const val = b.getAttribute('data-set');
-        await updateDoc(doc(db,'submissions',id), { status: val });
-        await refreshCounts();
-        await load();
-      });
+    // close menu if clicked outside
+    document.addEventListener('click', (e)=>{
+      if (!menu.contains(e.target) && !pill.contains(e.target)){
+        menu.style.display = 'none';
+      }
     });
 
     // delete
-    listEl.querySelectorAll('[data-del]').forEach(b=>{
-      b.addEventListener('click', async (e)=>{
-        e.stopPropagation();
-        const id = b.getAttribute('data-del');
-        if (!confirm('Delete this submission?')) return;
-        await deleteDoc(doc(db,'submissions',id));
-        await refreshCounts();
-        await load();
-      });
+    body.querySelector(`[data-del="${d.id}"]`).addEventListener('click', async ()=>{
+      if (!confirm('Delete this submission?')) return;
+      try{
+        await deleteDoc(doc(db,'submissions', d.id));
+        item.remove();
+        await refreshBadges();
+        if (!listEl.querySelector('.item')) emptyEl.style.display = 'block';
+      }catch(err){ alert('Delete failed\n\n'+(err?.message||err)); }
     });
+
+    item.appendChild(head);
+    item.appendChild(menu);
+    item.appendChild(body);
+    listEl.appendChild(item);
   }
 </script>
 </body>
