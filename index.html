@@ -15,10 +15,11 @@
     --panel:#ffffff;
     --chip:#e9eef5;
     --chipText:#29445c;
-    --pill-orange:#f7b500;
-    --pill-blue:#3b82f6;
-    --pill-green:#16a34a;
-    --pill-red:#ef4444;
+    --pill-orange:#ef4444;  /* red for action_required */
+    --pill-blue:#3b82f6;    /* contacted */
+    --pill-green:#16a34a;   /* registered */
+    --warn-bg:#fff5cc;      /* yellow background for not-acted */
+    --row-bg:#f7f9fb;
     --btn:#233e57;
     --btnText:#fff;
     --radius:16px;
@@ -26,18 +27,16 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-  a{color:#1b63d9;text-decoration:none}
   button{font-family:inherit}
 
   .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-
-  .cardPanel{background:var(--panel);border-radius:20px;padding:18px 18px;box-shadow:var(--shadow);margin-bottom:18px}
+  .cardPanel{background:var(--panel);border-radius:20px;padding:18px;box-shadow:var(--shadow);margin-bottom:18px}
 
   /* Sign in */
   .signinBox{max-width:420px;margin:120px auto;background:var(--panel);padding:28px;border-radius:18px;box-shadow:var(--shadow)}
   .signinBox h2{margin:0 0 14px}
   .row{display:flex;gap:10px}
-  .input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #d7dee7;background:#f5f7fa}
+  .input, select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #d7dee7;background:#f5f7fa}
   .btn{background:var(--btn);color:var(--btnText);border:none;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer}
   .btn:disabled{opacity:.6;cursor:wait}
   .ghost{background:#e9eef5;color:#30495f}
@@ -57,34 +56,40 @@
   @media(max-width:900px){ .cards{grid-template-columns:repeat(2,1fr)} }
   @media(max-width:520px){ .cards{grid-template-columns:1fr} }
 
-  /* Filters bar */
+  /* Filters */
   .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .filters .input, .filters select{padding:10px 12px;border:1px solid #d7dee7;border-radius:12px;background:#f5f7fa}
   .spacer{flex:1 1 auto}
 
   /* Table */
-  .tableBox{background:var(--panel);border-radius:20px;padding:14px 14px;box-shadow:var(--shadow)}
+  .tableBox{background:var(--panel);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
   table{width:100%;border-collapse:separate;border-spacing:0 10px}
   th{font-weight:800;text-align:left;font-size:13px;color:#4a6279;padding:0 10px 6px}
-  td{background:#f7f9fb;padding:12px 10px;border-top:1px solid #e8eef5;border-bottom:1px solid #e8eef5}
-  tr td:first-child{border-left:1px solid #e8eef5;border-top-left-radius:12px;border-bottom-left-radius:12px}
-  tr td:last-child{border-right:1px solid #e8eef5;border-top-right-radius:12px;border-bottom-right-radius:12px}
+  td{background:var(--row-bg);padding:12px 10px;border-top:1px solid #e8eef5;border-bottom:1px solid #e8eef5}
+  tr.master td:first-child{border-left:1px solid #e8eef5;border-top-left-radius:12px;border-bottom-left-radius:12px}
+  tr.master td:last-child{border-right:1px solid #e8eef5;border-top-right-radius:12px;border-bottom-right-radius:12px}
+  tr.master.warn td{background:var(--warn-bg)}
 
-  .chip{display:inline-block;background:var(--chip);color:var(--chipText);padding:2px 8px;border-radius:999px;font-weight:700;font-size:12px}
+  /* expand row */
+  tr.detail td{background:#ffffff;border:1px solid #e8eef5;border-radius:12px}
+  .detailInner{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .detailItem b{display:block;font-size:12px;color:#4a6279;margin-bottom:4px}
+  .detailActions{display:flex;gap:10px;align-items:center;margin-top:10px}
+  .danger{background:#ffd9d9;color:#8a1717;border:none;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
+
   .pill{display:inline-block;color:#fff;padding:5px 10px;border-radius:999px;font-weight:800;font-size:12px}
-  .pill.orange{background:var(--pill-orange)}
+  .pill.red{background:var(--pill-orange)}
   .pill.blue{background:var(--pill-blue)}
   .pill.green{background:var(--pill-green)}
-  .pill.red{background:var(--pill-red)}
 
-  .actions button{margin-right:6px;border:none;border-radius:999px;padding:7px 12px;font-weight:800;cursor:pointer}
-  .btn-orange{background:#ffe8b3;color:#7a4c00}
-  .btn-blue{background:#e1efff;color:#11488f}
-  .btn-green{background:#d6f6df;color:#0b6930}
-  .btn-red{background:#ffd9d9;color:#8a1717}
+  /* pill-like select for status control */
+  .statusSelect{appearance:none;border:none;padding:8px 14px;border-radius:999px;color:#fff;font-weight:800;cursor:pointer}
+  .statusSelect.action_required{background:var(--pill-orange)}
+  .statusSelect.contacted{background:var(--pill-blue)}
+  .statusSelect.registered{background:var(--pill-green)}
 
   .note{color:#b3261e;font-weight:700}
   .hidden{display:none}
+  .pointer{cursor:pointer}
 </style>
 </head>
 <body>
@@ -93,22 +98,15 @@
   <!-- SIGN IN -->
   <section id="signin" class="signinBox hidden">
     <h2>Admin sign in</h2>
-    <div class="row" style="margin-bottom:8px">
-      <input id="email" class="input" placeholder="Email" />
-    </div>
-    <div class="row" style="margin-bottom:14px">
-      <input id="password" class="input" placeholder="Password" type="password" />
-    </div>
-    <div class="row">
-      <button id="signInBtn" class="btn">Sign in</button>
-    </div>
+    <div class="row" style="margin-bottom:8px"><input id="email" class="input" placeholder="Email" /></div>
+    <div class="row" style="margin-bottom:14px"><input id="password" class="input" placeholder="Password" type="password" /></div>
+    <div class="row"><button id="signInBtn" class="btn">Sign in</button></div>
     <p id="err" class="note" style="margin-top:12px"></p>
   </section>
 
   <!-- PANEL -->
   <section id="panel" class="hidden">
 
-    <!-- who + actions -->
     <div class="cardPanel">
       <div class="filters">
         <div id="who" class="chip">Signed in…</div>
@@ -131,17 +129,14 @@
           <option value="Vake">Vake</option>
           <option value="Krtsanisi">Krtsanisi</option>
         </select>
-
         <select id="statusFilter">
           <option value="All">All statuses</option>
           <option value="action_required">Action required</option>
           <option value="contacted">Contacted</option>
           <option value="registered">Registered</option>
         </select>
-
         <input id="startDate" class="input" type="date" />
         <input id="endDate" class="input" type="date" />
-
         <button id="applyBtn" class="btn">Apply</button>
         <button id="resetBtn" class="btn ghost">Reset</button>
       </div>
@@ -153,15 +148,14 @@
         <thead>
           <tr>
             <th style="width:160px">Created</th>
-            <th style="width:100px">Branch</th>
+            <th style="width:110px">Branch</th>
+            <th style="width:260px">Name</th>
             <th style="width:180px">Form</th>
-            <th style="width:280px">Name / Email / Phone</th>
-            <th>Details</th>
-            <th style="width:120px">Status</th>
-            <th style="width:260px">Actions</th>
+            <th style="width:220px">Course / School</th>
+            <th style="width:140px">Status</th>
           </tr>
         </thead>
-        <tbody id="rows"><tr><td colspan="7">Loading…</td></tr></tbody>
+        <tbody id="rows"><tr><td colspan="6">Loading…</td></tr></tbody>
       </table>
     </div>
   </section>
@@ -177,15 +171,13 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
-  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
   import {
     initializeFirestore, collection, query, where, orderBy, onSnapshot, getDocs,
     updateDoc, deleteDoc, doc, getDoc, writeBatch, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-  /* ====== CONFIG (your project) ====== */
+  /* --- your Firebase project --- */
   const firebaseConfig = {
     apiKey: "AIzaSyB-vfjAb9matVnpO6BVc3xBoFHnT_xXfH0",
     authDomain: "levels-registration.firebaseapp.com",
@@ -195,12 +187,11 @@
     appId: "1:883788306190:web:1da45dc034cca9edefa95f"
   };
 
-  /* ====== FIREBASE INIT ====== */
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = initializeFirestore(app, { ignoreUndefinedProperties:true });
 
-  /* ====== UI refs ====== */
+  /* ===== UI refs ===== */
   const $ = (s)=>document.querySelector(s);
   const signin  = $('#signin');
   const panel   = $('#panel');
@@ -219,7 +210,7 @@
   const statusFilter = $('#statusFilter');
   const startDate = $('#startDate'); const endDate = $('#endDate');
 
-  /* ====== FORMS DASHBOARD ====== */
+  /* ====== Dashboard cards ====== */
   const FORM_DEFS = [
     { id:'EnglishRegistration', label:'English Registration', css:'f-english' },
     { id:'ArtRegistration',     label:'Art Registration',     css:'f-art' },
@@ -230,6 +221,7 @@
   const cardsEl = $('#formCards');
   let selectedForm = null;
   let countersUnsubs = [];
+
   function renderCards(){
     cardsEl.innerHTML = FORM_DEFS.map(f => `
       <button class="card ${f.css}" data-form="${f.id}">
@@ -240,14 +232,9 @@
     `).join('');
   }
   function startBadgeCounters(){
-    // clear previous
     countersUnsubs.splice(0).forEach(u => u && u());
     FORM_DEFS.forEach(f => {
-      const qNew = query(
-        collection(db,'submissions'),
-        where('form','==',f.id),
-        where('isNew','==',true)
-      );
+      const qNew = query(collection(db,'submissions'), where('form','==',f.id), where('isNew','==',true));
       const unsub = onSnapshot(qNew, snap=>{
         const b = cardsEl.querySelector(`.card[data-form="${f.id}"] .badge`);
         if(!b) return;
@@ -262,209 +249,202 @@
     const btn = e.target.closest('.card[data-form]');
     if(!btn) return;
     selectedForm = btn.dataset.form;
-    applyFilters(); // reload list
-    $('#resultsBox')?.scrollIntoView({behavior:'smooth', block:'start'});
+    applyFilters();
+    $('#resultsBox').scrollIntoView({behavior:'smooth', block:'start'});
   });
 
-  /* ====== AUTH GUARD ====== */
-  function show(id){
-    [signin,panel,forbid].forEach(el=>el.classList.add('hidden'));
-    id.classList.remove('hidden');
-  }
+  /* ====== Auth guard ====== */
+  function show(id){ [signin,panel,forbid].forEach(el=>el.classList.add('hidden')); id.classList.remove('hidden'); }
   async function ensureAdmin(email){
-    const docRef = doc(db,'admins', email.toLowerCase());
-    const snap = await getDoc(docRef);
-    if(!snap.exists()) return false;
-    const data = snap.data() || {};
-    return data.role === 'admin';
+    const snap = await getDoc(doc(db,'admins', email.toLowerCase()));
+    return snap.exists() && (snap.data().role === 'admin');
   }
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ show(signin); return; }
     who.textContent = `Signed in as ${user.email}`;
-    const ok = await ensureAdmin(user.email);
-    if(!ok){ show(forbid); return; }
+    if(!(await ensureAdmin(user.email))){ show(forbid); return; }
     show(panel);
     renderCards(); startBadgeCounters();
-    selectedForm = null; // start with all forms
-    resetFilters();
-    applyFilters();
+    selectedForm = null; resetFilters(); applyFilters();
   });
 
-  /* ====== SIGN-IN/OUT ====== */
+  /* ====== sign in/out ====== */
   signInBtn.addEventListener('click', async ()=>{
     errEl.textContent = '';
-    const email = $('#email').value.trim();
-    const pass  = $('#password').value;
+    const email = $('#email').value.trim(); const pass = $('#password').value;
     if(!email || !pass){ errEl.textContent = 'Enter email and password.'; return; }
-    try{
-      signInBtn.disabled = true;
-      await signInWithEmailAndPassword(auth,email,pass);
-    }catch(e){
-      errEl.textContent = e.message || 'Failed to sign in.';
-    }finally{ signInBtn.disabled = false; }
+    try{ signInBtn.disabled = true; await signInWithEmailAndPassword(auth,email,pass); }
+    catch(e){ errEl.textContent = e.message || 'Failed to sign in.'; }
+    finally{ signInBtn.disabled = false; }
   });
   signOutBtn.addEventListener('click', ()=>signOut(auth));
-  backBtn.addEventListener('click', ()=>{ show(signin); });
+  backBtn.addEventListener('click', ()=>show(signin));
 
-  /* ====== TABLE (filters + list) ====== */
+  /* ====== list & filters ====== */
   let unsubList = null;
-  function resetFilters(){
-    branchFilter.value='All';
-    statusFilter.value='All';
-    startDate.value=''; endDate.value='';
-  }
+  function resetFilters(){ branchFilter.value='All'; statusFilter.value='All'; startDate.value=''; endDate.value=''; }
   function buildQuery(){
     let q = collection(db,'submissions');
-
-    if(selectedForm){ q = query(q, where('form','==', selectedForm)); }
-    const br = branchFilter.value;
-    if(br && br!=='All'){ q = query(q, where('branch','==', br)); }
-    const st = statusFilter.value;
-    if(st && st!=='All'){ q = query(q, where('status','==', st)); }
-
-    const sd = startDate.value ? new Date(startDate.value + 'T00:00:00') : null;
-    const ed = endDate.value ? new Date(endDate.value   + 'T23:59:59') : null;
-    if(sd && ed){
-      q = query(q, where('createdAt','>=', sd), where('createdAt','<=', ed));
-    }else if(sd){
-      q = query(q, where('createdAt','>=', sd));
-    }else if(ed){
-      q = query(q, where('createdAt','<=', ed));
-    }
-
+    if(selectedForm) q = query(q, where('form','==', selectedForm));
+    const br = branchFilter.value; if(br!=='All') q = query(q, where('branch','==', br));
+    const st = statusFilter.value; if(st!=='All') q = query(q, where('status','==', st));
+    const sd = startDate.value ? new Date(startDate.value+'T00:00:00') : null;
+    const ed = endDate.value ? new Date(endDate.value+'T23:59:59') : null;
+    if(sd && ed) q = query(q, where('createdAt','>=',sd), where('createdAt','<=',ed));
+    else if(sd) q = query(q, where('createdAt','>=',sd));
+    else if(ed) q = query(q, where('createdAt','<=',ed));
     q = query(q, orderBy('createdAt','desc'));
     return q;
   }
-
   function fmtDate(ts){
     if(!ts) return '';
     const d = ts.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   }
-
+  function pill(status){
+    return status==='registered' ? `<span class="pill green">Registered</span>` :
+           status==='contacted'  ? `<span class="pill blue">Contacted</span>` :
+                                   `<span class="pill red">Action required</span>`;
+  }
   function renderRows(rows){
-    if(!rows.length){ rowsEl.innerHTML = `<tr><td colspan="7">No results.</td></tr>`; return; }
+    if(!rows.length){ rowsEl.innerHTML = `<tr><td colspan="6">No results.</td></tr>`; return; }
     rowsEl.innerHTML = rows.map(r=>{
-      const statusPill =
-        r.status==='registered' ? `<span class="pill green">Registered</span>` :
-        r.status==='contacted'  ? `<span class="pill blue">Contacted</span>` :
-                                  `<span class="pill orange">Action required</span>`;
-      const details = [
-        r.course ? `<div><b>Course:</b> ${r.course}</div>` : '',
-        r.school ? `<div><b>School:</b> ${r.school}</div>` : '',
-        r.age    ? `<div><b>Age:</b> ${r.age}</div>`       : '',
-      ].join('');
-
-      const fullName = [r.firstName,r.lastName].filter(Boolean).join(' ');
-      const contact  = [r.email, r.phoneE164 || r.phone].filter(Boolean).join('<br>');
-
-      return `
-        <tr data-id="${r.id}">
+      const fullName = [r.firstName,r.lastName].filter(Boolean).join(' ') || '-';
+      const course = r.course || r.school || '';
+      const warn = r.status === 'action_required' ? 'warn' : '';
+      // master (collapsed)
+      const master = `
+        <tr class="master pointer ${warn}" data-id="${r.id}">
           <td>${fmtDate(r.createdAt)}</td>
-          <td>${r.branch || ''}</td>
-          <td>${r.form || ''}</td>
-          <td><div style="font-weight:800">${fullName || '-'}</div><div style="font-size:12px;color:#5b7389">${contact}</div></td>
-          <td>${details || ''}</td>
-          <td>${statusPill}</td>
-          <td class="actions">
-            <button class="btn-orange" data-action="set" data-value="action_required">Action required</button>
-            <button class="btn-blue"   data-action="set" data-value="contacted">Contacted</button>
-            <button class="btn-green"  data-action="set" data-value="registered">Registered</button>
-            <button class="btn-red"    data-action="delete">Delete</button>
+          <td>${r.branch||''}</td>
+          <td><div style="font-weight:800">${fullName}</div></td>
+          <td>${r.form||''}</td>
+          <td>${course}</td>
+          <td>${pill(r.status)}</td>
+        </tr>`;
+      // details (expanded)
+      const details = `
+        <tr class="detail hidden" data-id="${r.id}">
+          <td colspan="6">
+            <div class="detailInner">
+              <div class="detailItem">
+                <b>Email</b>
+                <div>${r.email || '-'}</div>
+              </div>
+              <div class="detailItem">
+                <b>Phone</b>
+                <div>${r.phoneE164 || r.phone || '-'}</div>
+              </div>
+              <div class="detailItem">
+                <b>Age</b>
+                <div>${r.age || '-'}</div>
+              </div>
+              <div class="detailItem" style="grid-column: 1 / -1">
+                <b>Message</b>
+                <div>${(r.message||'').replace(/\n/g,'<br>') || '-'}</div>
+              </div>
+              <div class="detailActions" style="grid-column: 1 / -1">
+                <select class="statusSelect ${r.status}" data-action="set" data-id="${r.id}">
+                  <option value="action_required" ${r.status==='action_required'?'selected':''}>Action required</option>
+                  <option value="contacted" ${r.status==='contacted'?'selected':''}>Contacted</option>
+                  <option value="registered" ${r.status==='registered'?'selected':''}>Registered</option>
+                </select>
+                <button class="danger" data-action="delete" data-id="${r.id}">Delete</button>
+              </div>
+            </div>
           </td>
-        </tr>
-      `;
+        </tr>`;
+      return master + details;
     }).join('');
   }
-
   async function markVisibleAsSeen(rows){
-    const batch = writeBatch(db);
-    let n = 0;
-    rows.forEach(r=>{
-      if(r.isNew){ batch.update(doc(db,'submissions',r.id), {isNew:false}); n++; }
-    });
+    const batch = writeBatch(db); let n = 0;
+    rows.forEach(r=>{ if(r.isNew){ batch.update(doc(db,'submissions',r.id), {isNew:false}); n++; } });
     if(n) await batch.commit();
   }
-
   function applyFilters(){
-    if(unsubList) { unsubList(); unsubList = null; }
-    rowsEl.innerHTML = `<tr><td colspan="7">Loading…</td></tr>`;
-    try{
-      unsubList = onSnapshot(buildQuery(), async (snap)=>{
-        const arr = [];
-        snap.forEach(d => arr.push({ id:d.id, ...d.data() }));
-        renderRows(arr);
-        markVisibleAsSeen(arr);
-      }, (err)=>{
-        rowsEl.innerHTML = `<tr><td colspan="7" class="note">Error: ${err.message || err}</td></tr>`;
-      });
-    }catch(err){
-      rowsEl.innerHTML = `<tr><td colspan="7" class="note">Error: ${err.message || err}</td></tr>`;
-    }
+    if(unsubList){ unsubList(); unsubList=null; }
+    rowsEl.innerHTML = `<tr><td colspan="6">Loading…</td></tr>`;
+    unsubList = onSnapshot(buildQuery(), async (snap)=>{
+      const arr = []; snap.forEach(d=>arr.push({id:d.id, ...d.data()}));
+      renderRows(arr); markVisibleAsSeen(arr);
+    }, (err)=>{ rowsEl.innerHTML = `<tr><td colspan="6" class="note">Error: ${err.message||err}</td></tr>`; });
   }
   applyBtn.addEventListener('click', applyFilters);
   resetBtn.addEventListener('click', ()=>{ selectedForm=null; resetFilters(); applyFilters(); });
 
-  // row actions
+  // expand/collapse & actions
   rowsEl.addEventListener('click', async (e)=>{
-    const btn = e.target.closest('button[data-action]');
-    if(!btn) return;
-    const tr = e.target.closest('tr[data-id]'); if(!tr) return;
-    const id = tr.dataset.id;
-    const ref = doc(db,'submissions', id);
-    const act = btn.dataset.action;
-    try{
-      btn.disabled = true;
-      if(act==='delete'){
-        if(confirm('Delete this submission?')) await deleteDoc(ref);
-      }else if(act==='set'){
-        await updateDoc(ref, { status: btn.dataset.value, updatedAt: serverTimestamp() });
+    const master = e.target.closest('tr.master');
+    const delBtn = e.target.closest('button[data-action="delete"]');
+    const sel    = e.target.closest('select.statusSelect');
+    if(master){
+      const id = master.dataset.id;
+      const detail = rowsEl.querySelector(`tr.detail[data-id="${id}"]`);
+      if(!detail) return;
+      detail.classList.toggle('hidden');
+      return;
+    }
+    if(delBtn){
+      const id = delBtn.dataset.id;
+      if(!confirm('Delete this submission?')) return;
+      delBtn.disabled = true;
+      try{ await deleteDoc(doc(db,'submissions',id)); }catch(err){ alert(err.message||err); }
+      finally{ delBtn.disabled=false; }
+      return;
+    }
+    if(sel){
+      const id = sel.dataset.id;
+      const value = sel.value;
+      // recolor the select immediately
+      sel.classList.remove('action_required','contacted','registered');
+      sel.classList.add(value);
+      try{
+        await updateDoc(doc(db,'submissions',id), { status:value, updatedAt: serverTimestamp() });
+      }catch(err){ alert(err.message||err); }
+      // also recolor the master row and pill without waiting for snapshot
+      const masterRow = rowsEl.querySelector(`tr.master[data-id="${id}"]`);
+      const pillCell  = masterRow?.querySelector('td:last-child');
+      if(masterRow){
+        if(value==='action_required'){ masterRow.classList.add('warn'); }
+        else{ masterRow.classList.remove('warn'); }
       }
-    }catch(err){
-      alert(err.message || err);
-    }finally{ btn.disabled=false; }
-  });
-
-  /* ====== CSV DOWNLOAD ====== */
-  downloadBtn.addEventListener('click', async ()=>{
-    try{
-      const snap = await getDocs(buildQuery());
-      const rows = [];
-      snap.forEach(d=>{
-        const x = d.data();
-        rows.push({
-          id: d.id,
-          createdAt: fmtDate(x.createdAt),
-          branch: x.branch||'',
-          form: x.form||'',
-          firstName: x.firstName||'',
-          lastName: x.lastName||'',
-          email: x.email||'',
-          phone: x.phoneE164||x.phone||'',
-          age: x.age||'',
-          course: x.course||x.school||'',
-          status: x.status||'',
-          message: (x.message||'').replace(/\n/g,' ')
-        });
-      });
-      if(!rows.length){ alert('Nothing to download.'); return; }
-      const headers = Object.keys(rows[0]);
-      const csv = [
-        headers.join(','),
-        ...rows.map(r => headers.map(h => `"${String(r[h]??'').replace(/"/g,'""')}"`).join(','))
-      ].join('\r\n');
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `submissions_${Date.now()}.csv`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }catch(err){
-      alert(err.message || err);
+      if(pillCell){
+        pillCell.innerHTML = value==='registered' ? `<span class="pill green">Registered</span>` :
+                             value==='contacted'  ? `<span class="pill blue">Contacted</span>` :
+                                                    `<span class="pill red">Action required</span>`;
+      }
+      return;
     }
   });
 
+  /* ===== CSV download (kept) ===== */
+  downloadBtn.addEventListener('click', async ()=>{
+    const snap = await getDocs(buildQuery());
+    const rows = []; snap.forEach(d=>{
+      const x=d.data();
+      rows.push({
+        id:d.id, createdAt: fmtDate(x.createdAt), branch:x.branch||'', form:x.form||'',
+        firstName:x.firstName||'', lastName:x.lastName||'', email:x.email||'',
+        phone:x.phoneE164||x.phone||'', age:x.age||'', course:x.course||x.school||'',
+        status:x.status||'', message:(x.message||'').replace(/\n/g,' ')
+      });
+    });
+    if(!rows.length){ alert('Nothing to download.'); return; }
+    const headers = Object.keys(rows[0]);
+    const csv = [ headers.join(','), ...rows.map(r=>headers.map(h=>`"${String(r[h]??'').replace(/"/g,'""')}"`).join(',')) ].join('\r\n');
+    const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`submissions_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(a.href);
+  });
+
+  /* init cards after auth */
+  onAuthStateChanged(auth, (user)=>{ if(user){ renderCards(); startBadgeCounters(); }});
+  cardsEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.card[data-form]'); if(!btn) return;
+    selectedForm = btn.dataset.form; applyFilters();
+  });
 </script>
 </body>
 </html>
+
 
