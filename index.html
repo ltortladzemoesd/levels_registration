@@ -1,29 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Submissions Admin</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-
 <style>
   :root{
-    --ink:#173048;
-    --muted:#6a7d8f;
-    --bg:#f6f8fb;
-    --panel:#ffffff;
-    --chip:#e9eef5;
-    --chipText:#29445c;
-    --pill-orange:#ef4444;  /* red for action_required */
-    --pill-blue:#3b82f6;    /* contacted */
-    --pill-green:#16a34a;   /* registered */
-    --warn-bg:#fff5cc;      /* yellow background for not-acted */
-    --row-bg:#f7f9fb;
-    --btn:#233e57;
-    --btnText:#fff;
-    --radius:16px;
-    --shadow:0 10px 20px rgba(0,0,0,.06);
+    --ink:#173048; --muted:#5e7388; --bg:#f6f8fb; --panel:#fff; --row:#f7f9fb;
+    --warn:#fff5cc; --shadow:0 10px 20px rgba(0,0,0,.06);
+    --pill-red:#ef4444; --pill-blue:#3b82f6; --pill-green:#16a34a;
+    --btn:#233e57; --btnText:#fff;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
@@ -34,62 +21,56 @@
 
   /* Sign in */
   .signinBox{max-width:420px;margin:120px auto;background:var(--panel);padding:28px;border-radius:18px;box-shadow:var(--shadow)}
-  .signinBox h2{margin:0 0 14px}
+  .signinBox h2{margin:0 0 12px}
   .row{display:flex;gap:10px}
   .input, select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #d7dee7;background:#f5f7fa}
   .btn{background:var(--btn);color:var(--btnText);border:none;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer}
-  .btn:disabled{opacity:.6;cursor:wait}
-  .ghost{background:#e9eef5;color:#30495f}
+  .btn.ghost{background:#e9eef5;color:#30495f}
+  .note{color:#b3261e;font-weight:700}
+  .hidden{display:none}
 
-  /* Dashboard form cards */
+  /* dashboard cards */
   .cards{display:grid;grid-template-columns:repeat(5,minmax(160px,1fr));gap:16px}
-  .card{position:relative;border:none;border-radius:18px;padding:18px 14px;text-align:left;color:#173048;background:#eef2f5;box-shadow:0 10px 20px rgba(0,0,0,.06);cursor:pointer;transition:transform .06s ease, box-shadow .12s ease}
-  .card:hover{transform:translateY(-1px);box-shadow:0 14px 26px rgba(0,0,0,.08)}
-  .card .title{font-weight:800;font-size:16px;line-height:1.2;display:block}
-  .card .sub{opacity:.75;font-size:13px;margin-top:6px;display:block}
+  .dcard{position:relative;border:none;border-radius:18px;padding:18px 14px;text-align:left;background:#eef2f5;box-shadow:0 10px 20px rgba(0,0,0,.06);cursor:pointer}
+  .dcard .title{font-weight:800;font-size:16px}
+  .dcard .sub{opacity:.75;font-size:13px;margin-top:6px}
   .badge{position:absolute;top:10px;right:10px;height:22px;min-width:22px;padding:0 6px;border-radius:11px;background:#ff3b30;color:#fff;display:none;align-items:center;justify-content:center;font-weight:800;font-size:12px}
-  .card.f-english{background:#E9F3FF}
-  .card.f-art{background:#FFF0E6}
-  .card.f-summer{background:#E9FFF4}
-  .card.f-abroad{background:#F3E9FF}
-  .card.f-corp{background:#FFF6E6}
+  .dcard.f-english{background:#E9F3FF}
+  .dcard.f-art{background:#FFF0E6}
+  .dcard.f-summer{background:#E9FFF4}
+  .dcard.f-abroad{background:#F3E9FF}
+  .dcard.f-corp{background:#FFF6E6}
   @media(max-width:900px){ .cards{grid-template-columns:repeat(2,1fr)} }
   @media(max-width:520px){ .cards{grid-template-columns:1fr} }
 
-  /* Filters */
+  /* filters */
   .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
   .spacer{flex:1 1 auto}
 
-  /* Table */
-  .tableBox{background:var(--panel);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
-  table{width:100%;border-collapse:separate;border-spacing:0 10px}
-  th{font-weight:800;text-align:left;font-size:13px;color:#4a6279;padding:0 10px 6px}
-  td{background:var(--row-bg);padding:12px 10px;border-top:1px solid #e8eef5;border-bottom:1px solid #e8eef5}
-  tr.master td:first-child{border-left:1px solid #e8eef5;border-top-left-radius:12px;border-bottom-left-radius:12px}
-  tr.master td:last-child{border-right:1px solid #e8eef5;border-top-right-radius:12px;border-bottom-right-radius:12px}
-  tr.master.warn td{background:var(--warn-bg)}
-
-  /* expand row */
-  tr.detail td{background:#ffffff;border:1px solid #e8eef5;border-radius:12px}
-  .detailInner{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .detailItem b{display:block;font-size:12px;color:#4a6279;margin-bottom:4px}
-  .detailActions{display:flex;gap:10px;align-items:center;margin-top:10px}
-  .danger{background:#ffd9d9;color:#8a1717;border:none;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
-
-  .pill{display:inline-block;color:#fff;padding:5px 10px;border-radius:999px;font-weight:800;font-size:12px}
-  .pill.red{background:var(--pill-orange)}
+  /* list */
+  #list{display:grid;gap:12px}
+  .sub{background:var(--row);border:1px solid #e8eef5;border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+  .sub.warn{background:var(--warn)}
+  .top{display:grid;grid-template-columns:160px 110px 1fr 180px 220px 140px;gap:8px;align-items:center;padding:14px 14px}
+  .top > div{font-weight:600}
+  .top .when{font-weight:800}
+  .top .branch{color:#344b60}
+  .pill{justify-self:end;border:none;border-radius:999px;padding:6px 12px;font-weight:800;color:#fff;cursor:pointer}
+  .pill.red{background:var(--pill-red)}
   .pill.blue{background:var(--pill-blue)}
   .pill.green{background:var(--pill-green)}
 
-  /* pill-like select for status control */
-  .statusSelect{appearance:none;border:none;padding:8px 14px;border-radius:999px;color:#fff;font-weight:800;cursor:pointer}
-  .statusSelect.action_required{background:var(--pill-orange)}
-  .statusSelect.contacted{background:var(--pill-blue)}
-  .statusSelect.registered{background:var(--pill-green)}
+  .more{padding:14px;border-top:1px dashed #dfe6ee}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .grid .item b{display:block;font-size:12px;color:#4a6279;margin-bottom:4px}
+  .footer{display:flex;justify-content:flex-end;margin-top:10px}
+  .danger{background:#ffd9d9;color:#8a1717;border:none;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
 
-  .note{color:#b3261e;font-weight:700}
-  .hidden{display:none}
-  .pointer{cursor:pointer}
+  /* status menu */
+  #statusMenu{position:fixed;inset:auto auto 0 0;transform:translate(-9999px, -9999px);background:#fff;border:1px solid #dfe6ee;border-radius:12px;box-shadow:0 12px 24px rgba(0,0,0,.12);padding:6px;z-index:9999}
+  #statusMenu button{display:block;width:100%;text-align:left;background:none;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  #statusMenu button:hover{background:#f1f5f9}
+  .sep{height:1px;background:#e8eef5;margin:4px 0}
 </style>
 </head>
 <body>
@@ -98,30 +79,25 @@
   <!-- SIGN IN -->
   <section id="signin" class="signinBox hidden">
     <h2>Admin sign in</h2>
-    <div class="row" style="margin-bottom:8px"><input id="email" class="input" placeholder="Email" /></div>
-    <div class="row" style="margin-bottom:14px"><input id="password" class="input" placeholder="Password" type="password" /></div>
+    <div class="row" style="margin-bottom:8px"><input id="email" class="input" placeholder="Email"/></div>
+    <div class="row" style="margin-bottom:12px"><input id="password" type="password" class="input" placeholder="Password"/></div>
     <div class="row"><button id="signInBtn" class="btn">Sign in</button></div>
     <p id="err" class="note" style="margin-top:12px"></p>
   </section>
 
   <!-- PANEL -->
   <section id="panel" class="hidden">
-
     <div class="cardPanel">
       <div class="filters">
-        <div id="who" class="chip">Signed in…</div>
+        <div id="who">Signed in…</div>
         <div class="spacer"></div>
         <button id="downloadBtn" class="btn ghost">Download CSV</button>
         <button id="signOutBtn" class="btn">Sign out</button>
       </div>
     </div>
 
-    <!-- DASHBOARD CARDS -->
-    <div class="cardPanel">
-      <div id="formCards" class="cards"></div>
-    </div>
+    <div class="cardPanel"><div id="formCards" class="cards"></div></div>
 
-    <!-- FILTERS -->
     <div class="cardPanel">
       <div class="filters">
         <select id="branchFilter">
@@ -135,37 +111,37 @@
           <option value="contacted">Contacted</option>
           <option value="registered">Registered</option>
         </select>
-        <input id="startDate" class="input" type="date" />
-        <input id="endDate" class="input" type="date" />
+        <input id="startDate" class="input" type="date"/>
+        <input id="endDate" class="input" type="date"/>
         <button id="applyBtn" class="btn">Apply</button>
         <button id="resetBtn" class="btn ghost">Reset</button>
       </div>
     </div>
 
-    <!-- TABLE -->
-    <div id="resultsBox" class="tableBox">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:160px">Created</th>
-            <th style="width:110px">Branch</th>
-            <th style="width:260px">Name</th>
-            <th style="width:180px">Form</th>
-            <th style="width:220px">Course / School</th>
-            <th style="width:140px">Status</th>
-          </tr>
-        </thead>
-        <tbody id="rows"><tr><td colspan="6">Loading…</td></tr></tbody>
-      </table>
+    <div class="cardPanel">
+      <!-- header row mimic -->
+      <div class="top" style="padding:0 14px 8px;color:#4a6279;font-size:13px;font-weight:800">
+        <div>Created</div><div>Branch</div><div>Name</div><div>Form</div><div>Course / School</div><div>Status</div>
+      </div>
+      <div id="list">Loading…</div>
     </div>
   </section>
 
   <!-- FORBIDDEN -->
   <section id="forbidden" class="signinBox hidden">
     <h2 class="note">You are not authorized</h2>
-    <p>This page requires a document at <code>/admins/{email}</code> with <code>role: "admin"</code>.</p>
+    <p>This page requires a Firestore doc at <code>/admins/{email}</code> with <code>role: "admin"</code>.</p>
     <button id="backBtn" class="btn" style="margin-top:10px">Back to sign in</button>
   </section>
+</div>
+
+<!-- tiny status menu -->
+<div id="statusMenu" aria-hidden="true">
+  <button data-value="action_required">Action required</button>
+  <div class="sep"></div>
+  <button data-value="contacted">Contacted</button>
+  <div class="sep"></div>
+  <button data-value="registered">Registered</button>
 </div>
 
 <!-- Firebase -->
@@ -177,7 +153,7 @@
     updateDoc, deleteDoc, doc, getDoc, writeBatch, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-  /* --- your Firebase project --- */
+  /* --- Firebase project --- */
   const firebaseConfig = {
     apiKey: "AIzaSyB-vfjAb9matVnpO6BVc3xBoFHnT_xXfH0",
     authDomain: "levels-registration.firebaseapp.com",
@@ -186,31 +162,20 @@
     messagingSenderId: "883788306190",
     appId: "1:883788306190:web:1da45dc034cca9edefa95f"
   };
-
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = initializeFirestore(app, { ignoreUndefinedProperties:true });
 
-  /* ===== UI refs ===== */
-  const $ = (s)=>document.querySelector(s);
-  const signin  = $('#signin');
-  const panel   = $('#panel');
-  const forbid  = $('#forbidden');
-  const who     = $('#who');
-  const rowsEl  = $('#rows');
-  const errEl   = $('#err');
+  /* ===== helpers ===== */
+  const $ = s => document.querySelector(s);
+  const signin = $('#signin'), panel = $('#panel'), forbid = $('#forbidden');
+  const who = $('#who'), errEl = $('#err');
+  const signInBtn = $('#signInBtn'), signOutBtn = $('#signOutBtn'), backBtn = $('#backBtn');
+  const downloadBtn = $('#downloadBtn'), applyBtn = $('#applyBtn'), resetBtn = $('#resetBtn');
+  const listEl = $('#list');
+  const branchFilter = $('#branchFilter'), statusFilter = $('#statusFilter');
+  const startDate = $('#startDate'), endDate = $('#endDate');
 
-  const signInBtn = $('#signInBtn');
-  const signOutBtn = $('#signOutBtn');
-  const backBtn = $('#backBtn');
-  const downloadBtn = $('#downloadBtn');
-  const applyBtn = $('#applyBtn'); const resetBtn = $('#resetBtn');
-
-  const branchFilter = $('#branchFilter');
-  const statusFilter = $('#statusFilter');
-  const startDate = $('#startDate'); const endDate = $('#endDate');
-
-  /* ====== Dashboard cards ====== */
   const FORM_DEFS = [
     { id:'EnglishRegistration', label:'English Registration', css:'f-english' },
     { id:'ArtRegistration',     label:'Art Registration',     css:'f-art' },
@@ -221,54 +186,32 @@
   const cardsEl = $('#formCards');
   let selectedForm = null;
   let countersUnsubs = [];
+  let unsubList = null;
 
-  function renderCards(){
-    cardsEl.innerHTML = FORM_DEFS.map(f => `
-      <button class="card ${f.css}" data-form="${f.id}">
-        <span class="title">${f.label}</span>
-        <span class="sub">Tap to view submissions</span>
-        <span class="badge">0</span>
-      </button>
-    `).join('');
-  }
-  function startBadgeCounters(){
-    countersUnsubs.splice(0).forEach(u => u && u());
-    FORM_DEFS.forEach(f => {
-      const qNew = query(collection(db,'submissions'), where('form','==',f.id), where('isNew','==',true));
-      const unsub = onSnapshot(qNew, snap=>{
-        const b = cardsEl.querySelector(`.card[data-form="${f.id}"] .badge`);
-        if(!b) return;
-        const n = snap.size;
-        b.textContent = n>99 ? '99+' : String(n);
-        b.style.display = n ? 'inline-flex' : 'none';
-      });
-      countersUnsubs.push(unsub);
-    });
-  }
-  cardsEl.addEventListener('click', (e)=>{
-    const btn = e.target.closest('.card[data-form]');
-    if(!btn) return;
-    selectedForm = btn.dataset.form;
-    applyFilters();
-    $('#resultsBox').scrollIntoView({behavior:'smooth', block:'start'});
-  });
+  const statusLabel = s => s==='registered' ? 'Registered' : s==='contacted' ? 'Contacted' : 'Action required';
+  const statusClass = s => s==='registered' ? 'green' : s==='contacted' ? 'blue' : 'red';
+  const fmtDate = ts => {
+    if(!ts) return '';
+    const d = ts.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  };
 
-  /* ====== Auth guard ====== */
   function show(id){ [signin,panel,forbid].forEach(el=>el.classList.add('hidden')); id.classList.remove('hidden'); }
   async function ensureAdmin(email){
     const snap = await getDoc(doc(db,'admins', email.toLowerCase()));
-    return snap.exists() && (snap.data().role === 'admin');
+    return snap.exists() && snap.data().role === 'admin';
   }
+
   onAuthStateChanged(auth, async (user)=>{
     if(!user){ show(signin); return; }
     who.textContent = `Signed in as ${user.email}`;
     if(!(await ensureAdmin(user.email))){ show(forbid); return; }
     show(panel);
-    renderCards(); startBadgeCounters();
+    renderFormCards(); startBadgeCounters();
     selectedForm = null; resetFilters(); applyFilters();
   });
 
-  /* ====== sign in/out ====== */
+  /* sign in/out */
   signInBtn.addEventListener('click', async ()=>{
     errEl.textContent = '';
     const email = $('#email').value.trim(); const pass = $('#password').value;
@@ -280,145 +223,147 @@
   signOutBtn.addEventListener('click', ()=>signOut(auth));
   backBtn.addEventListener('click', ()=>show(signin));
 
-  /* ====== list & filters ====== */
-  let unsubList = null;
+  /* dashboard cards + badges */
+  function renderFormCards(){
+    cardsEl.innerHTML = FORM_DEFS.map(f=>`
+      <button class="dcard ${f.css}" data-form="${f.id}">
+        <span class="title">${f.label}</span>
+        <span class="sub">Tap to view submissions</span>
+        <span class="badge">0</span>
+      </button>`).join('');
+  }
+  function startBadgeCounters(){
+    countersUnsubs.splice(0).forEach(u=>u && u());
+    FORM_DEFS.forEach(f=>{
+      const qNew = query(collection(db,'submissions'), where('form','==',f.id), where('isNew','==',true));
+      const unsub = onSnapshot(qNew, snap=>{
+        const b = cardsEl.querySelector(`.dcard[data-form="${f.id}"] .badge`);
+        if(!b) return;
+        const n = snap.size; b.textContent = n>99?'99+':String(n); b.style.display = n?'inline-flex':'none';
+      });
+      countersUnsubs.push(unsub);
+    });
+  }
+  cardsEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.dcard[data-form]'); if(!btn) return;
+    selectedForm = btn.dataset.form; applyFilters(); $('.cardPanel:last-child').scrollIntoView({behavior:'smooth'});
+  });
+
+  /* filters/list */
   function resetFilters(){ branchFilter.value='All'; statusFilter.value='All'; startDate.value=''; endDate.value=''; }
   function buildQuery(){
     let q = collection(db,'submissions');
-    if(selectedForm) q = query(q, where('form','==', selectedForm));
-    const br = branchFilter.value; if(br!=='All') q = query(q, where('branch','==', br));
-    const st = statusFilter.value; if(st!=='All') q = query(q, where('status','==', st));
+    if(selectedForm) q = query(q, where('form','==',selectedForm));
+    const br = branchFilter.value; if(br!=='All') q = query(q, where('branch','==',br));
+    const st = statusFilter.value; if(st!=='All') q = query(q, where('status','==',st));
     const sd = startDate.value ? new Date(startDate.value+'T00:00:00') : null;
     const ed = endDate.value ? new Date(endDate.value+'T23:59:59') : null;
     if(sd && ed) q = query(q, where('createdAt','>=',sd), where('createdAt','<=',ed));
-    else if(sd) q = query(q, where('createdAt','>=',sd));
-    else if(ed) q = query(q, where('createdAt','<=',ed));
+    else if(sd)  q = query(q, where('createdAt','>=',sd));
+    else if(ed)  q = query(q, where('createdAt','<=',ed));
     q = query(q, orderBy('createdAt','desc'));
     return q;
   }
-  function fmtDate(ts){
-    if(!ts) return '';
-    const d = ts.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-  }
-  function pill(status){
-    return status==='registered' ? `<span class="pill green">Registered</span>` :
-           status==='contacted'  ? `<span class="pill blue">Contacted</span>` :
-                                   `<span class="pill red">Action required</span>`;
-  }
-  function renderRows(rows){
-    if(!rows.length){ rowsEl.innerHTML = `<tr><td colspan="6">No results.</td></tr>`; return; }
-    rowsEl.innerHTML = rows.map(r=>{
-      const fullName = [r.firstName,r.lastName].filter(Boolean).join(' ') || '-';
+  function renderList(rows){
+    if(!rows.length){ listEl.textContent = 'No results.'; return; }
+    listEl.innerHTML = rows.map(r=>{
+      const name = [r.firstName,r.lastName].filter(Boolean).join(' ') || '-';
       const course = r.course || r.school || '';
-      const warn = r.status === 'action_required' ? 'warn' : '';
-      // master (collapsed)
-      const master = `
-        <tr class="master pointer ${warn}" data-id="${r.id}">
-          <td>${fmtDate(r.createdAt)}</td>
-          <td>${r.branch||''}</td>
-          <td><div style="font-weight:800">${fullName}</div></td>
-          <td>${r.form||''}</td>
-          <td>${course}</td>
-          <td>${pill(r.status)}</td>
-        </tr>`;
-      // details (expanded)
-      const details = `
-        <tr class="detail hidden" data-id="${r.id}">
-          <td colspan="6">
-            <div class="detailInner">
-              <div class="detailItem">
-                <b>Email</b>
-                <div>${r.email || '-'}</div>
-              </div>
-              <div class="detailItem">
-                <b>Phone</b>
-                <div>${r.phoneE164 || r.phone || '-'}</div>
-              </div>
-              <div class="detailItem">
-                <b>Age</b>
-                <div>${r.age || '-'}</div>
-              </div>
-              <div class="detailItem" style="grid-column: 1 / -1">
-                <b>Message</b>
-                <div>${(r.message||'').replace(/\n/g,'<br>') || '-'}</div>
-              </div>
-              <div class="detailActions" style="grid-column: 1 / -1">
-                <select class="statusSelect ${r.status}" data-action="set" data-id="${r.id}">
-                  <option value="action_required" ${r.status==='action_required'?'selected':''}>Action required</option>
-                  <option value="contacted" ${r.status==='contacted'?'selected':''}>Contacted</option>
-                  <option value="registered" ${r.status==='registered'?'selected':''}>Registered</option>
-                </select>
-                <button class="danger" data-action="delete" data-id="${r.id}">Delete</button>
-              </div>
+      const warn = r.status==='action_required' ? 'warn':'';
+      return `
+        <article class="sub ${warn}" data-id="${r.id}">
+          <div class="top">
+            <div class="when">${fmtDate(r.createdAt)}</div>
+            <div class="branch">${r.branch||''}</div>
+            <div class="name" style="font-weight:800">${name}</div>
+            <div class="form">${r.form||''}</div>
+            <div class="course">${course}</div>
+            <button class="pill ${statusClass(r.status)}" data-act="status" data-id="${r.id}" data-status="${r.status}">
+              ${statusLabel(r.status)}
+            </button>
+          </div>
+          <div class="more hidden">
+            <div class="grid">
+              <div class="item"><b>Email</b><div>${r.email||'-'}</div></div>
+              <div class="item"><b>Phone</b><div>${r.phoneE164||r.phone||'-'}</div></div>
+              <div class="item"><b>Age</b><div>${r.age||'-'}</div></div>
+              <div class="item" style="grid-column:1/-1"><b>Message</b><div>${(r.message||'').replace(/\n/g,'<br>')||'-'}</div></div>
             </div>
-          </td>
-        </tr>`;
-      return master + details;
+            <div class="footer"><button class="danger" data-act="delete" data-id="${r.id}">Delete</button></div>
+          </div>
+        </article>`;
     }).join('');
   }
   async function markVisibleAsSeen(rows){
-    const batch = writeBatch(db); let n = 0;
-    rows.forEach(r=>{ if(r.isNew){ batch.update(doc(db,'submissions',r.id), {isNew:false}); n++; } });
+    const batch = writeBatch(db); let n=0;
+    rows.forEach(r=>{ if(r.isNew){ batch.update(doc(db,'submissions',r.id),{isNew:false}); n++; } });
     if(n) await batch.commit();
   }
   function applyFilters(){
     if(unsubList){ unsubList(); unsubList=null; }
-    rowsEl.innerHTML = `<tr><td colspan="6">Loading…</td></tr>`;
-    unsubList = onSnapshot(buildQuery(), async (snap)=>{
-      const arr = []; snap.forEach(d=>arr.push({id:d.id, ...d.data()}));
-      renderRows(arr); markVisibleAsSeen(arr);
-    }, (err)=>{ rowsEl.innerHTML = `<tr><td colspan="6" class="note">Error: ${err.message||err}</td></tr>`; });
+    listEl.textContent = 'Loading…';
+    unsubList = onSnapshot(buildQuery(), async snap=>{
+      const arr = []; snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+      renderList(arr); markVisibleAsSeen(arr);
+    }, err => listEl.textContent = `Error: ${err.message||err}`);
   }
   applyBtn.addEventListener('click', applyFilters);
   resetBtn.addEventListener('click', ()=>{ selectedForm=null; resetFilters(); applyFilters(); });
 
-  // expand/collapse & actions
-  rowsEl.addEventListener('click', async (e)=>{
-    const master = e.target.closest('tr.master');
-    const delBtn = e.target.closest('button[data-action="delete"]');
-    const sel    = e.target.closest('select.statusSelect');
-    if(master){
-      const id = master.dataset.id;
-      const detail = rowsEl.querySelector(`tr.detail[data-id="${id}"]`);
-      if(!detail) return;
-      detail.classList.toggle('hidden');
-      return;
-    }
-    if(delBtn){
-      const id = delBtn.dataset.id;
+  /* expand / delete / status menu */
+  const menu = $('#statusMenu'); let menuAnchor=null;
+  function openMenu(anchor,current,id){
+    menuAnchor = anchor;
+    menu.dataset.id = id; // store
+    // position under anchor
+    const r = anchor.getBoundingClientRect();
+    const x = r.left + window.scrollX; const y = r.bottom + 6 + window.scrollY;
+    menu.style.transform = `translate(${x}px, ${y}px)`;
+    menu.removeAttribute('aria-hidden');
+  }
+  function closeMenu(){ menu.setAttribute('aria-hidden','true'); menu.style.transform='translate(-9999px,-9999px)'; menuAnchor=null; }
+
+  document.addEventListener('click', async (e)=>{
+    const sub = e.target.closest('.sub');
+    const act = e.target.closest('[data-act]');
+    if(act && act.dataset.act==='delete'){
       if(!confirm('Delete this submission?')) return;
-      delBtn.disabled = true;
-      try{ await deleteDoc(doc(db,'submissions',id)); }catch(err){ alert(err.message||err); }
-      finally{ delBtn.disabled=false; }
+      try{ await deleteDoc(doc(db,'submissions', act.dataset.id)); }catch(err){ alert(err.message||err); }
       return;
     }
-    if(sel){
-      const id = sel.dataset.id;
-      const value = sel.value;
-      // recolor the select immediately
-      sel.classList.remove('action_required','contacted','registered');
-      sel.classList.add(value);
+    if(act && act.dataset.act==='status'){
+      // open menu
+      openMenu(act, act.dataset.status, act.dataset.id);
+      return;
+    }
+    // clicks on menu items
+    if(e.target.closest('#statusMenu button')){
+      const val = e.target.dataset.value;
+      const id = menu.dataset.id;
+      closeMenu();
       try{
-        await updateDoc(doc(db,'submissions',id), { status:value, updatedAt: serverTimestamp() });
+        await updateDoc(doc(db,'submissions',id), { status:val, updatedAt: serverTimestamp() });
       }catch(err){ alert(err.message||err); }
-      // also recolor the master row and pill without waiting for snapshot
-      const masterRow = rowsEl.querySelector(`tr.master[data-id="${id}"]`);
-      const pillCell  = masterRow?.querySelector('td:last-child');
-      if(masterRow){
-        if(value==='action_required'){ masterRow.classList.add('warn'); }
-        else{ masterRow.classList.remove('warn'); }
-      }
-      if(pillCell){
-        pillCell.innerHTML = value==='registered' ? `<span class="pill green">Registered</span>` :
-                             value==='contacted'  ? `<span class="pill blue">Contacted</span>` :
-                                                    `<span class="pill red">Action required</span>`;
+      // optimistic UI updates
+      const card = document.querySelector(`.sub[data-id="${id}"]`);
+      const pill = card?.querySelector('.pill');
+      if(card && pill){
+        card.classList.toggle('warn', val==='action_required');
+        pill.classList.remove('red','blue','green');
+        pill.classList.add(statusClass(val));
+        pill.textContent = statusLabel(val);
+        pill.dataset.status = val;
       }
       return;
     }
+    // click outside menu closes it
+    if(!menu.contains(e.target) && e.target !== menuAnchor){ closeMenu(); }
+
+    // toggle expansion when clicking card (but not when clicking buttons inside)
+    if(sub && !act && !e.target.closest('#statusMenu')){ sub.querySelector('.more').classList.toggle('hidden'); }
   });
 
-  /* ===== CSV download (kept) ===== */
+  /* CSV */
   downloadBtn.addEventListener('click', async ()=>{
     const snap = await getDocs(buildQuery());
     const rows = []; snap.forEach(d=>{
@@ -435,13 +380,6 @@
     const csv = [ headers.join(','), ...rows.map(r=>headers.map(h=>`"${String(r[h]??'').replace(/"/g,'""')}"`).join(',')) ].join('\r\n');
     const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`submissions_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(a.href);
-  });
-
-  /* init cards after auth */
-  onAuthStateChanged(auth, (user)=>{ if(user){ renderCards(); startBadgeCounters(); }});
-  cardsEl.addEventListener('click', (e)=>{
-    const btn = e.target.closest('.card[data-form]'); if(!btn) return;
-    selectedForm = btn.dataset.form; applyFilters();
   });
 </script>
 </body>
