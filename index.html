@@ -62,6 +62,8 @@
   .login .row{display:flex;flex-direction:column;gap:6px;border-top:none}
   .login input{width:100%}
   .error{color:#b91c1c;font-weight:700}
+  .errbar{display:none;margin:12px 0;padding:12px 14px;border-radius:12px;background:#fef2f2;color:#991b1b;font-weight:700}
+  .errbar a{color:#991b1b;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -114,6 +116,8 @@
       <button id="signOutBtn">Sign out</button>
     </div>
 
+    <div id="errbar" class="errbar"></div>
+
     <div class="form-tabs">
       <button class="tab active" data-form="">All</button>
       <button class="tab" data-form="EnglishRegistration">English</button>
@@ -144,7 +148,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, startAfter, getDocs, updateDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs, updateDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
   /* ===== Firebase config ===== */
   const firebaseConfig = {
@@ -179,6 +183,13 @@
     if(status==='contacted') return '<span class="pill blue">Contacted</span>';
     return '<span class="pill amber">Action required</span>';
   };
+
+  const errbar = document.getElementById('errbar');
+  const showError = (msg, link) => {
+    errbar.innerHTML = link ? `${msg} — <a href="${link}" target="_blank" rel="noopener">Create index</a>` : msg;
+    errbar.style.display = 'block';
+  };
+  const clearError = () => { errbar.style.display = 'none'; errbar.textContent = ''; };
 
   /* ===== State ===== */
   let activeForm = '';          // '' = All
@@ -261,94 +272,119 @@
     await load();
   };
 
-  /* ===== Queries (backward-compatible) ===== */
-  async function runQuery(formKey, branchKey, status, fromISO, toISO, pageLimit=150){
-    // Build time bounds
-    let fromTS = fromISO ? Timestamp.fromDate(new Date(fromISO+'T00:00:00')) : null;
-    let toTS   = toISO   ? Timestamp.fromDate(new Date(toISO+'T23:59:59')) : null;
+  /* ===== Queries (safe for legacy docs) ===== */
+  function toTSStart(iso){ return iso ? Timestamp.fromDate(new Date(iso+'T00:00:00')) : null; }
+  function toTSEnd(iso){   return iso ? Timestamp.fromDate(new Date(iso+'T23:59:59')) : null; }
+  function inRange(ts, fromTS, toTS){
+    if (!ts) return true;
+    const s = ts.seconds || Math.floor((new Date(ts)).getTime()/1000);
+    if (fromTS && s < fromTS.seconds) return false;
+    if (toTS && s > toTS.seconds) return false;
+    return true;
+    }
 
+  async function runQuery(formKey, branchKey, status, fromISO, toISO, pageLimit=300){
     const col = collection(db,'submissions');
+    const fromTS = toTSStart(fromISO);
+    const toTS   = toTSEnd(toISO);
 
-    // Helper to build an indexed query
-    const build = (opts) => {
-      let q = query(col);
-      if (opts.where) opts.where.forEach(w=> q = query(q, where(...w)));
-      // add range if any
-      if (fromTS) q = query(q, where('createdAt','>=',fromTS));
-      if (toTS)   q = query(q, where('createdAt','<=',toTS));
-      q = query(q, orderBy('createdAt','desc'), limit(pageLimit));
-      return q;
-    };
+    // --- NEW documents (formKey/branchKey) - fully indexed and fast
+    const newWhere = [];
+    if (formKey)   newWhere.push(['formKey','==',formKey]);
+    if (branchKey) newWhere.push(['branchKey','==',branchKey]);
+    if (status)    newWhere.push(['status','==',status]);
 
-    const promises = [];
+    let qNew = query(col);
+    newWhere.forEach(w => qNew = query(qNew, where(...w)));
+    if (fromTS) qNew = query(qNew, where('createdAt','>=',fromTS));
+    if (toTS)   qNew = query(qNew, where('createdAt','<=',toTS));
+    qNew = query(qNew, orderBy('createdAt','desc'), limit(pageLimit));
 
-    if (!formKey){ // ALL forms
-      const whereArr = [];
-      if (branchKey) whereArr.push(['branchKey','==',branchKey]);
-      if (status)    whereArr.push(['status','==',status]);
-      promises.push(getDocs(build({ where: whereArr })));
-      // Also fetch legacy docs for branch if user filtered by branch (they lack branchKey)
-      if (branchKey){
-        const legacyBranches = branchKey==='vake' ? ['Vake','ვაკე'] : ['Krtsanisi','კრწანისი'];
-        // Two small queries (cannot OR in Firestore)
-        for (const b of legacyBranches){
-          const w = [['branch','==',b]];
-          if (status) w.push(['status','==',status]);
-          promises.push(getDocs(build({ where: w })));
-        }
+    // --- LEGACY documents (formId/branch) - avoid composite indexes
+    // We fetch with 0 or 1 equality filter and then filter client-side.
+    const legacyPromises = [];
+    if (formKey){
+      legacyPromises.push(getDocs(query(col, where('formId','==',formKey), limit(pageLimit))));
+    }else if (branchKey){
+      const labels = branchKey==='vake' ? ['Vake','ვაკე'] : ['Krtsanisi','კრწანისი'];
+      for (const b of labels){
+        legacyPromises.push(getDocs(query(col, where('branch','==',b), limit(pageLimit))));
       }
-    }else{ // Specific form
-      const base = [];
-      if (status) base.push(['status','==',status]);
-      if (branchKey) base.push(['branchKey','==',branchKey]);
-
-      // New docs with formKey
-      promises.push(getDocs(build({ where: [['formKey','==',formKey], ...base] })));
-
-      // Legacy docs with only formId
-      const legacyWhere = [['formId','==',formKey], ...base.filter(w=>w[0]!=='branchKey')]; // cannot filter legacy by branchKey
-      promises.push(getDocs(build({ where: legacyWhere })));
-
-      // If branch filter is set, also fetch legacy docs by visible branch text
-      if (branchKey){
-        const legacyBranches = branchKey==='vake' ? ['Vake','ვაკე'] : ['Krtsanisi','კრწანისი'];
-        for (const b of legacyBranches){
-          const w = [['formId','==',formKey], ['branch','==',b]];
-          if (status) w.push(['status','==',status]);
-          promises.push(getDocs(build({ where: w })));
-        }
+    }else{
+      // All forms, no branch filter — pull a recent window by status if set, else by createdAt.
+      if (status){
+        legacyPromises.push(getDocs(query(col, where('status','==',status), limit(pageLimit))));
+      }else{
+        // no filters -> keep reads sane by ordering + limiting
+        legacyPromises.push(getDocs(query(col, orderBy('createdAt','desc'), limit(pageLimit))));
       }
     }
 
-    const snaps = await Promise.all(promises);
-    const rows = [];
+    const out = [];
     const seen = new Set();
+
+    // Fetch new docs (will throw if a rare index is still missing)
+    try{
+      const snap = await getDocs(qNew);
+      snap.forEach(d=>{
+        if (seen.has(d.id)) return; seen.add(d.id);
+        out.push({id:d.id, ...d.data()});
+      });
+    }catch(e){
+      // Surface the index link if present but still continue with legacy results
+      const link = e?.message?.includes('https://console.firebase.google.com') ? e.message.match(/https:[^\s)]+/)[0] : '';
+      showError('Some results need a new index for faster queries.', link);
+    }
+
+    // Fetch legacy sets and filter client-side
+    const snaps = await Promise.allSettled(legacyPromises);
+    const fromR = fromTS?.seconds, toR = toTS?.seconds;
+    const wantBranchLabels = branchKey ? (branchKey==='vake' ? ['Vake','ვაკე'] : ['Krtsanisi','კრწანისი']) : null;
+
     for (const s of snaps){
-      s.forEach(docSnap=>{
-        const d = docSnap.data();
-        const id = docSnap.id;
-        if (seen.has(id)) return;
-        seen.add(id);
-        rows.push({ id, ...d });
+      if (s.status !== 'fulfilled') continue;
+      s.value.forEach(d=>{
+        if (seen.has(d.id)) return;
+        const v = d.data();
+        // form filter
+        if (formKey && !(v.formId===formKey)) return;
+        // status filter
+        if (status && v.status!==status) return;
+        // branch filter on legacy labels
+        if (wantBranchLabels && !wantBranchLabels.includes(v.branch)) return;
+        // date filter
+        const secs = v.createdAt?.seconds;
+        if (fromR && (!secs || secs < fromR)) return;
+        if (toR && (!secs || secs > toR)) return;
+
+        seen.add(d.id);
+        out.push({id:d.id, ...v});
       });
     }
-    // client-side final filter for safety (date already applied via ranges)
-    return rows.sort((a,b)=>{
-      const ta = a.createdAt?.seconds||0, tb = b.createdAt?.seconds||0;
-      return tb-ta;
-    });
+
+    // final sort newest first
+    out.sort((a,b)=> (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+    return out;
   }
 
   async function refreshCounts(){
-    // quick aggregate for "action required" across all forms (recent 200)
-    const snaps = await runQuery('', '', 'action_required', '', '', 200);
-    allNewCount.textContent = snaps.length;
+    // fast count: new+legacy share 'status'
+    const col = collection(db,'submissions');
+    const snap = await getDocs(query(col, where('status','==','action_required'), orderBy('createdAt','desc'), limit(200)));
+    allNewCount.textContent = snap.size || 0;
   }
 
   async function load(){
+    clearError();
     listEl.innerHTML = '<div class="center muted">Loading…</div>';
-    const rows = await runQuery(activeForm, (branchSel||''), (statusSel||''), fromDate, toDate);
-    render(rows);
+    try{
+      const rows = await runQuery(activeForm, (branchSel||''), (statusSel||''), fromDate, toDate);
+      render(rows);
+    }catch(e){
+      const link = e?.message?.includes('https://console.firebase.google.com') ? e.message.match(/https:[^\s)]+/)[0] : '';
+      showError('Query failed.', link);
+      render([]); // at least clear the loader
+    }
   }
 
   /* ===== Render ===== */
@@ -417,7 +453,7 @@
         document.getElementById('menu-'+id).classList.toggle('show');
       });
     });
-    document.addEventListener('click', (e)=>{
+    document.addEventListener('click', ()=>{
       document.querySelectorAll('.menu.show').forEach(m=> m.classList.remove('show'));
     });
 
@@ -445,10 +481,6 @@
       });
     });
   }
-</script>
-</body>
-</html>
-
 </script>
 </body>
 </html>
