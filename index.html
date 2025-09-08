@@ -3,437 +3,559 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Admin Panel</title>
+<title>Levels – Admin Panel</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;500;700;800&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --bg:#f7f9fb; --card:#ffffff; --ink:#0f1f28; --muted:#5a6b7b;
-    --pill:#e8eef5; --border:#e6ebf0; --brand:#233e57;
-    --yellow:#fff6cf; --green:#e8f6e9; --blue:#e7f0ff; --red:#ffe8e8;
-    --radius:18px; --shadow:0 10px 24px rgba(0,0,0,.06);
+    --bg:#f6f8fb;
+    --card:#ffffff;
+    --ink:#0f1f28;
+    --muted:#5c6b78;
+    --soft:#e9eef4;
+    --line:#e8edf3;
+    --badge:#1f6feb;
+    --ok:#24a148;
+    --warn:#efb21a;
+    --danger:#e55353;
+    --pill:#0d2940;
+    --radius:18px;
+    --shadow:0 10px 22px rgba(0,0,0,.06);
   }
-  *{box-sizing:border-box} html,body{margin:0;height:100%}
-  body{font-family:"Red Hat Display",ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--ink)}
 
-  .wrap{max-width:1100px;margin:24px auto;padding:16px}
+  *{ box-sizing:border-box }
+  html,body{ margin:0; background:var(--bg); color:var(--ink); font-family:"Red Hat Display", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
 
-  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .shell{ max-width:1200px; margin:28px auto 80px; padding:0 18px; }
 
-  /* login */
-  #loginView{max-width:440px;margin:60px auto}
-  #loginView h1{margin:0 0 12px}
-  .input{width:100%;border:1px solid var(--border);border-radius:14px;padding:12px 14px;font-size:15px;margin:8px 0}
-  .btn{border:none;border-radius:14px;padding:12px 16px;font-weight:800;background:var(--brand);color:#fff;cursor:pointer}
-  .btn[disabled]{opacity:.7;cursor:progress}
-  .row{display:flex;gap:12px;align-items:center;justify-content:space-between}
+  /* top bar */
+  .bar{
+    background:var(--card); border-radius:var(--radius); padding:16px 16px 14px; box-shadow:var(--shadow);
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .bar .me{ font-weight:700; color:var(--muted); margin-right:auto; }
+  .bar select, .bar input[type="date"]{
+    background:#f2f5f9; border:none; border-radius:12px; padding:10px 12px; font-size:14px; color:var(--ink);
+  }
+  .btn{ background:var(--pill); color:#fff; border:none; padding:10px 16px; border-radius:12px; font-weight:800; cursor:pointer; }
+  .btn.ghost{ background:#edf3f9; color:#0d2940; }
 
-  /* header */
-  #appHeader{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
-  #filters{display:flex;gap:10px;align-items:center}
-  select{border:1px solid var(--border);border-radius:12px;padding:8px 12px;background:#fff}
+  /* tabs */
+  .tabs{ display:flex; gap:12px; margin:18px 0; }
+  .tab{
+    background:var(--card); color:#0d2940; border-radius:999px; padding:10px 16px; font-weight:800;
+    cursor:pointer; user-select:none; position:relative; box-shadow:var(--shadow);
+  }
+  .tab.active{ background:#e8f0ff; color:#1a49b8; }
+  .tab .dot{
+    position:absolute; top:-6px; right:-6px; min-width:22px; height:22px; padding:0 6px; border-radius:999px;
+    display:flex; align-items:center; justify-content:center; background:var(--badge); color:#fff; font-size:12px; font-weight:800;
+  }
 
-  /* form boxes */
-  .boxes{display:grid;grid-template-columns: repeat(5, 1fr); gap:12px;margin-bottom:16px}
-  .box{position:relative;border:1px solid var(--border);border-radius:16px;padding:16px;cursor:pointer;user-select:none;background:#fff;transition:transform .08s}
-  .box:hover{transform:translateY(-1px)}
-  .box.active{outline:2px solid var(--brand)}
-  .box h3{margin:0 0 6px;font-size:16px}
-  .tag{display:inline-block;background:var(--pill);color:var(--muted);border-radius:999px;padding:3px 10px;font-size:12px}
-  .badge{position:absolute;top:8px;right:8px;min-width:18px;height:18px;padding:0 6px;border-radius:999px;background:#e44; color:#fff; font-size:12px; display:flex;align-items:center;justify-content:center}
+  /* header row */
+  .hdr{
+    background:var(--card); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow);
+    display:grid; grid-template-columns: 1.1fr .9fr 1fr 1fr 1.1fr .7fr; gap:16px; color:#637789; font-weight:700;
+  }
 
   /* list */
-  #list{display:flex;flex-direction:column;gap:10px}
-  /* ↓ change: make item a positioning context and allow dropdown to show */
-  .item{position:relative;background:#fff;border:1px solid var(--border);border-radius:16px;overflow:visible}
-  .item.yellow{background:var(--yellow)}
-  .item .head{display:grid;grid-template-columns: 150px 110px 1fr 180px 160px 140px 46px; gap:8px;align-items:center;padding:12px 14px}
-  .head .mono{color:var(--muted);font-size:12px}
-  .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer}
+  .list{ margin-top:12px; display:flex; flex-direction:column; gap:16px; }
+  .row{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+  }
+  .rowHead{
+    display:grid; grid-template-columns: 1.1fr .9fr 1fr 1fr 1.1fr .7fr; gap:16px;
+    padding:18px 20px; align-items:center; border-bottom:1px dashed var(--line); cursor:pointer;
+  }
+  .k{
+    display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:700; color:#0d2940;
+  }
+  .sub{ color:var(--muted); font-weight:500; }
 
-  .pill.red{background:var(--red); color:#a10}
-  .pill.blue{background:var(--blue); color:#125}
-  .pill.green{background:var(--green); color:#174d17}
+  .status{
+    justify-self:end; position:relative;
+  }
+  .statusBtn{
+    display:inline-flex; align-items:center; gap:8px; border:none; cursor:pointer; font-weight:800;
+    padding:8px 14px; border-radius:999px; color:#fff; background:var(--danger);
+  }
+  .statusBtn.blue{ background:#2d7ff9 }
+  .statusBtn.green{ background:var(--ok) }
+  .statusMenu{
+    position:absolute; top:calc(100% + 8px); right:0; background:#fff; border-radius:12px; box-shadow:var(--shadow);
+    display:none; min-width:200px; overflow:hidden; z-index:5;
+  }
+  .statusMenu.open{ display:block; }
+  .statusMenu button{
+    display:block; width:100%; background:#fff; border:none; text-align:left; padding:12px 14px; cursor:pointer; font-weight:700;
+  }
+  .statusMenu button:hover{ background:#f4f8ff }
 
-  .item .body{padding:14px;border-top:1px dashed var(--border)}
-  .bodyGrid{display:grid;grid-template-columns: repeat(4, 1fr);gap:12px}
-  .field{background:#fafcff;border:1px solid var(--border);border-radius:12px;padding:10px}
-  .field b{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  /* expanded */
+  .body{ padding:16px 18px; display:none; background:#fff7d6; }
+  .row.action_required .body{ background:#fff7d6; }
+  .bodyGrid{ display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+  .chip{
+    background:#f2f6fb; border-radius:14px; padding:14px; min-height:64px;
+  }
+  .cap{ color:#637789; font-weight:700; margin-bottom:6px; font-size:14px; }
+  .val{ font-weight:700; color:#0d2940; word-break:break-word; }
+  .msg{ grid-column:1 / -1; background:#f9fcff; border-radius:14px; padding:14px; min-height:70px; }
+  .foot{ display:flex; justify-content:flex-start; gap:8px; margin-top:10px; }
+  .danger{ background:var(--danger)!important; }
 
-  .iconBtn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:6px 10px;cursor:pointer}
-  .actions{display:flex;gap:10px;align-items:center}
-
-  /* status menu */
-  .menu{position:absolute;z-index:50;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:6px;display:none}
-  .menu button{display:block;width:100%;text-align:left;background:none;border:none;padding:8px 10px;border-radius:10px;cursor:pointer}
-  .menu button:hover{background:#f3f6fb}
-
-  .empty{padding:26px;text-align:center;color:var(--muted)}
-  .loading{padding:26px;text-align:center}
-  @media (max-width:950px){ .boxes{grid-template-columns: repeat(2, 1fr)} .item .head{grid-template-columns: 120px 90px 1fr 160px 140px 120px 40px} }
-  @media (max-width:650px){ .boxes{grid-template-columns: 1fr} .bodyGrid{grid-template-columns: 1fr} }
+  @media (max-width:980px){
+    .hdr, .rowHead{ grid-template-columns: 1.2fr .9fr 1fr 1fr .9fr .8fr; }
+    .bodyGrid{ grid-template-columns: repeat(2,1fr) }
+  }
+  @media (max-width:680px){
+    .hdr, .rowHead{ grid-template-columns: 1fr 1fr; }
+    .status{ justify-self:start }
+    .bodyGrid{ grid-template-columns: 1fr }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
+  <div class="shell">
+    <!-- Top bar -->
+    <div class="bar">
+      <div class="me" id="who">Signed out</div>
 
-  <!-- LOGIN VIEW -->
-  <div id="loginView" class="card" style="display:none;">
-    <h1>Admin sign in</h1>
-    <input id="email" class="input" type="email" placeholder="Email" />
-    <input id="password" class="input" type="password" placeholder="Password" />
-    <div class="row">
-      <button id="loginBtn" class="btn">Sign in</button>
-      <div id="loginErr" style="color:#c33;font-size:13px;"></div>
+      <select id="branchSel">
+        <option value="all">All branches</option>
+        <option value="Vake">Vake</option>
+        <option value="Krtsanisi">Krtsanisi</option>
+        <option value="ვაკე">ვაკე</option>
+        <option value="კრწანისი">კრწანისი</option>
+      </select>
+
+      <select id="statusSel">
+        <option value="all">All statuses</option>
+        <option value="action_required">Action required</option>
+        <option value="contacted">Contacted</option>
+        <option value="registered">Registered</option>
+      </select>
+
+      <input type="date" id="fromDate" />
+      <input type="date" id="toDate" />
+      <button class="btn" id="applyBtn">Apply</button>
+      <button class="btn ghost" id="resetBtn">Reset</button>
+
+      <button class="btn" id="csvBtn">Download Excel</button>
+      <button class="btn danger" id="signBtn">Sign in</button>
     </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-form="all">All <span class="dot" id="c_all">0</span></div>
+      <div class="tab" data-form="english">English <span class="dot" id="c_english">0</span></div>
+      <div class="tab" data-form="art">Art <span class="dot" id="c_art">0</span></div>
+      <div class="tab" data-form="summer">Summer school <span class="dot" id="c_summer">0</span></div>
+      <div class="tab" data-form="study">Study abroad <span class="dot" id="c_study">0</span></div>
+      <div class="tab" data-form="corporate">Corporate <span class="dot" id="c_corporate">0</span></div>
+    </div>
+
+    <!-- Header row -->
+    <div class="hdr">
+      <div>Created</div>
+      <div>Branch</div>
+      <div>Name</div>
+      <div>Form</div>
+      <div>Course / School</div>
+      <div class="tac">Status</div>
+    </div>
+
+    <!-- Results -->
+    <div class="list" id="list"></div>
   </div>
 
-  <!-- APP VIEW -->
-  <div id="appView" style="display:none;">
-    <div id="appHeader">
-      <div style="font-weight:800;font-size:20px;">Submissions</div>
-      <div class="row">
-        <div id="filters">
-          <label>Branch:
-            <select id="fBranch">
-              <option value="ALL">All</option>
-              <option value="Vake">Vake</option>
-              <option value="Krtsanisi">Krtsanisi</option>
-            </select>
-          </label>
-          <label>Status:
-            <select id="fStatus">
-              <option value="ALL">All</option>
-              <option value="action_required">Action required</option>
-              <option value="contacted">Contacted</option>
-              <option value="registered">Registered</option>
-            </select>
-          </label>
-        </div>
-        <button id="logoutBtn" class="iconBtn">Sign out</button>
-      </div>
-    </div>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import {
+      getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import {
+      initializeFirestore, doc, getDoc, collection, query, where, orderBy, limit, startAt, endAt,
+      getDocs, updateDoc, deleteDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-    <!-- FORM BOXES -->
-    <div class="boxes">
-      <div class="box" data-form="EnglishRegistration"><h3>English</h3><span class="tag">Registration</span><span class="badge" style="display:none;"></span></div>
-      <div class="box" data-form="ArtRegistration"><h3>Art</h3><span class="tag">Registration</span><span class="badge" style="display:none;"></span></div>
-      <div class="box" data-form="SummerSchoolRegistration"><h3>Summer school</h3><span class="tag">Registration</span><span class="badge" style="display:none;"></span></div>
-      <div class="box" data-form="StudyAbroadRegistration"><h3>Study abroad</h3><span class="tag">Registration</span><span class="badge" style="display:none;"></span></div>
-      <div class="box" data-form="CorporateRegistration"><h3>Corporate</h3><span class="tag">Enrollment</span><span class="badge" style="display:none;"></span></div>
-    </div>
+    /* === Firebase config === */
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-vfjAb9matVnpO6BVc3xBoFHnT_xXfH0",
+      authDomain: "levels-registration.firebaseapp.com",
+      projectId: "levels-registration",
+      storageBucket: "levels-registration.firebasestorage.app",
+      messagingSenderId: "883788306190",
+      appId: "1:883788306190:web:1da45dc034cca9edefa95f"
+    };
 
-    <!-- LIST -->
-    <div id="list" class="card">
-      <div id="loading" class="loading">Loading…</div>
-      <div id="empty" class="empty" style="display:none;">No submissions yet.</div>
-    </div>
-  </div>
-</div>
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
 
-<!-- Firebase via CDN modules -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import {
-    initializeFirestore, collection, getDocs, query, where, doc, updateDoc, deleteDoc
-  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-  import {
-    getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
-  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    /* ===== State ===== */
+    let currentUser = null;
+    let role = null; // 'admin'
+    let activeFormTab = 'all';
 
-  /* ====== CONFIG ====== */
-  const firebaseConfig = {
-    apiKey: "AIzaSyB-vfjAb9matVnpO6BVc3xBoFHnT_xXfH0",
-    authDomain: "levels-registration.firebaseapp.com",
-    projectId: "levels-registration",
-    storageBucket: "levels-registration.firebasestorage.app",
-    messagingSenderId: "883788306190",
-    appId: "1:883788306190:web:1da45dc034cca9edefa95f"
-  };
-  const ADMIN_EMAIL = "levelscenter@gmail.com";
+    const who = document.getElementById('who');
+    const signBtn = document.getElementById('signBtn');
 
-  /* ====== INIT (safer for Wix iframes) ====== */
-  const app = initializeApp(firebaseConfig);
-  const db  = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
-  const auth = getAuth(app);
+    onAuthStateChanged(auth, async (u) => {
+      currentUser = u || null;
+      if(!currentUser){
+        who.textContent = 'Signed out';
+        signBtn.textContent = 'Sign in';
+        document.getElementById('list').innerHTML = '';
+        return;
+      }
+      // role check in /admins/{emailLower}
+      const key = (currentUser.email || '').toLowerCase();
+      const snap = await getDoc(doc(db, 'admins', key));
+      role = snap.exists() && (snap.data().role === 'admin') ? 'admin' : null;
 
-  /* ====== UI HOOKS ====== */
-  const loginView = document.getElementById('loginView');
-  const appView   = document.getElementById('appView');
-  const emailEl   = document.getElementById('email');
-  const passEl    = document.getElementById('password');
-  const loginBtn  = document.getElementById('loginBtn');
-  const loginErr  = document.getElementById('loginErr');
-  const logoutBtn = document.getElementById('logoutBtn');
+      if(!role){
+        who.textContent = `Signed in as ${currentUser.email} — not authorized`;
+        alert('You are not authorized (missing /admins/{email} with role "admin").');
+        return;
+      }
 
-  const boxes   = Array.from(document.querySelectorAll('.box'));
-  const listEl  = document.getElementById('list');
-  const emptyEl = document.getElementById('empty');
-  const loadEl  = document.getElementById('loading');
-  const fBranch = document.getElementById('fBranch');
-  const fStatus = document.getElementById('fStatus');
+      who.textContent = `Signed in as ${currentUser.email} (admin)`;
+      signBtn.textContent = 'Sign out';
 
-  /* ====== FORMS MAP ====== */
-  const FORM_KEYS = {
-    english:  "EnglishRegistration",
-    art:      "ArtRegistration",
-    summer:   "SummerSchoolRegistration",
-    abroad:   "StudyAbroadRegistration",
-    corporate:"CorporateRegistration",
-  };
-
-  // active selection
-  let activeFormKey = FORM_KEYS.english; // default view
-
-  /* ====== AUTH ====== */
-  onAuthStateChanged(auth, (user)=>{
-    if(user && user.email === ADMIN_EMAIL){
-      loginView.style.display = 'none';
-      appView.style.display = 'block';
-      refreshBadges();
-      loadList();
-    }else{
-      appView.style.display = 'none';
-      loginView.style.display = 'block';
-    }
-  });
-
-  loginBtn.addEventListener('click', async ()=>{
-    loginErr.textContent = '';
-    loginBtn.disabled = true;
-    try{
-      await signInWithEmailAndPassword(auth, emailEl.value.trim(), passEl.value);
-    }catch(err){
-      loginErr.textContent = err?.message || String(err);
-    }finally{
-      loginBtn.disabled = false;
-    }
-  });
-
-  logoutBtn.addEventListener('click', ()=> signOut(auth));
-
-  /* ====== HELPERS ====== */
-  const normBranch = (b, bk) => {
-    if (bk === "Vake" || bk === "Krtsanisi" || bk === "-") return bk;
-    if (!b) return "-";
-    const v = (b||"").toLowerCase();
-    if (["vake","ვაკე"].includes(v)) return "Vake";
-    if (["krtsanisi","კრწანისი","krtstanisi","krts"].includes(v)) return "Krtsanisi";
-    return b;
-  };
-  const statusPillClass = (s)=> s==="registered" ? "green" : s==="contacted" ? "blue" : "red";
-  const formatDate = (ts)=>{
-    if (!ts) return "-";
-    try{
-      const d = ts.toDate ? ts.toDate() : new Date(ts.seconds ? ts.seconds*1000 : ts);
-      return d.toLocaleString();
-    }catch{ return "-"; }
-  };
-
-  function docFormKey(d){
-    return d.formKey || d.form || d.formId || "";
-  }
-
-  /* ====== BADGES = count of status: action_required ====== */
-  async function refreshBadges(){
-    // Only count docs currently needing action
-    const qAll = query(collection(db,"submissions"), where("status","==","action_required"));
-    const snap = await getDocs(qAll);
-    const counts = { };
-    snap.forEach(docSnap=>{
-      const d = docSnap.data();
-      const key = docFormKey(d);
-      if (!key) return;
-      counts[key] = (counts[key]||0) + 1;
-    });
-    boxes.forEach(b=>{
-      const key = b.getAttribute('data-form');
-      const badge = b.querySelector('.badge');
-      const n = counts[key] || 0;
-      badge.style.display = n>0 ? 'flex' : 'none';
-      badge.textContent = n;
-      b.classList.toggle('active', key===activeFormKey);
-    });
-  }
-
-  /* ====== LOAD LIST ====== */
-  fBranch.addEventListener('change', loadList);
-  fStatus.addEventListener('change', loadList);
-
-  boxes.forEach(b=>{
-    b.addEventListener('click', ()=>{
-      activeFormKey = b.getAttribute('data-form');
-      boxes.forEach(x=> x.classList.toggle('active', x===b));
-      loadList();
-    });
-  });
-
-  async function loadList(){
-    loadEl.style.display = 'block';
-    emptyEl.style.display = 'none';
-    listEl.querySelectorAll('.item').forEach(n=>n.remove());
-
-    const [q1, q2, q3] = [
-      query(collection(db,"submissions"), where("formKey","==", activeFormKey)),
-      query(collection(db,"submissions"), where("form","==", activeFormKey)),
-      query(collection(db,"submissions"), where("formId","==", activeFormKey)),
-    ];
-
-    const [s1, s2, s3] = await Promise.all([getDocs(q1), getDocs(q2), getDocs(q3)]);
-    const map = new Map();
-    [s1,s2,s3].forEach(snap=>{
-      snap.forEach(docSnap => map.set(docSnap.id, { id:docSnap.id, ...docSnap.data() }));
+      await refreshCounters();
+      await loadRows();
     });
 
-    let rows = Array.from(map.values());
-
-    rows = rows.map(d=>{
-      const branch = normBranch(d.branch, d.branchKey);
-      const status = d.status || 'action_required';
-      return { ...d, _branch: branch, _status: status };
-    });
-
-    const br = fBranch.value;
-    const st = fStatus.value;
-    if (br !== 'ALL') rows = rows.filter(r=> r._branch === br || r._branch === '-' );
-    if (st !== 'ALL') rows = rows.filter(r=> r._status === st);
-
-    rows.sort((a,b)=>{
-      const ta = a.createdAt?.toMillis?.() ?? 0;
-      const tb = b.createdAt?.toMillis?.() ?? 0;
-      return tb - ta;
-    });
-
-    loadEl.style.display = 'none';
-    if (rows.length === 0){
-      emptyEl.style.display = 'block';
-      await refreshBadges();
-      return;
-    }
-
-    rows.forEach(d=> renderItem(d));
-    await refreshBadges();
-  }
-
-  /* ====== RENDER ITEM ====== */
-  function renderItem(d){
-    const item = document.createElement('div');
-    item.className = 'item' + (d._status==='action_required' ? ' yellow' : '');
-
-    const formName = (docFormKey(d)
-      .replace('Registration','')
-      .replace('Corporate','Corporate')
-      .replace('SummerSchool','Summer School')
-      .replace('StudyAbroad','Study Abroad')
-      .replace('English','English')
-      .replace('Art','Art')
-    );
-
-    const head = document.createElement('div');
-    head.className = 'head';
-    head.innerHTML = `
-      <div class="mono">${formatDate(d.createdAt)}</div>
-      <div>${d._branch || '-'}</div>
-      <div><b>${(d.firstName||'-')} ${(d.lastName||'')}</b></div>
-      <div>${formName || '-'}</div>
-      <div>${d.course || d.school || '-'}</div>
-      <div>
-        <span class="pill ${statusPillClass(d._status)}" data-menu-for="${d.id}">
-          ${d._status === 'registered' ? 'Registered' : d._status === 'contacted' ? 'Contacted' : 'Action required'}
-        </span>
-      </div>
-      <div><button class="iconBtn" data-expand="${d.id}">▼</button></div>
-    `;
-
-    const menu = document.createElement('div');
-    menu.className = 'menu';
-    menu.id = 'menu-' + d.id;
-    menu.innerHTML = `
-      <button data-status="action_required">Action required</button>
-      <button data-status="contacted">Contacted</button>
-      <button data-status="registered">Registered</button>
-    `;
-
-    const body = document.createElement('div');
-    body.className = 'body';
-    body.style.display = 'none';
-    body.innerHTML = `
-      <div class="bodyGrid">
-        <div class="field"><b>Email</b><div>${d.email||'-'}</div></div>
-        <div class="field"><b>Phone</b><div>${d.phoneE164||'-'}</div></div>
-        <div class="field"><b>Language</b><div>${d.lang||'-'}</div></div>
-        <div class="field"><b>Age</b><div>${d.age ?? '-'}</div></div>
-
-        <div class="field"><b>Branch</b><div>${d._branch || '-'}</div></div>
-        <div class="field"><b>Course / School</b><div>${d.course || d.school || '-'}</div></div>
-        <div class="field"><b>Form</b><div>${formName || '-'}</div></div>
-        <div class="field"><b>Created</b><div>${formatDate(d.createdAt)}</div></div>
-
-        <div class="field" style="grid-column:1 / -1;"><b>Message</b><div>${(d.message||'-').replace(/\n/g,'<br>')}</div></div>
-      </div>
-      <div class="actions" style="margin-top:10px">
-        <button class="iconBtn" data-del="${d.id}">Delete</button>
-      </div>
-    `;
-
-    head.querySelector(`[data-expand="${d.id}"]`).addEventListener('click', ()=>{
-      const isOpen = body.style.display !== 'none';
-      body.style.display = isOpen ? 'none' : 'block';
-    });
-
-    // show status menu anchored under the pill
-    const pill = head.querySelector(`[data-menu-for="${d.id}"]`);
-    pill.addEventListener('click', (ev)=>{
-      // hide any other open menus
-      document.querySelectorAll('.menu').forEach(m=>{ if(m!==menu) m.style.display='none'; });
-
-      const pillRect = pill.getBoundingClientRect();
-      const itemRect = item.getBoundingClientRect();
-      // position relative to the .item (now position:relative)
-      menu.style.left = (pillRect.left - itemRect.left) + 'px';
-      menu.style.top  = (pillRect.bottom - itemRect.top + 6) + 'px';
-      menu.style.display = 'block';
-    });
-
-    // choose status -> update doc, badge refresh, bg color update
-    menu.querySelectorAll('button').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        const newStatus = btn.getAttribute('data-status');
-        try{
-          await updateDoc(doc(db,'submissions', d.id), { status:newStatus });
-          d._status = newStatus;
-          pill.className = 'pill ' + statusPillClass(newStatus);
-          pill.textContent = newStatus==='registered' ? 'Registered' : newStatus==='contacted' ? 'Contacted' : 'Action required';
-          item.classList.toggle('yellow', newStatus==='action_required');
-          menu.style.display = 'none';
-          await refreshBadges(); // reflect counts for action_required
-        }catch(err){ alert('Failed to update status\n\n'+(err?.message||err)); }
-      });
-    });
-
-    document.addEventListener('click', (e)=>{
-      if (!menu.contains(e.target) && !pill.contains(e.target)){
-        menu.style.display = 'none';
+    signBtn.addEventListener('click', async ()=>{
+      if(!currentUser){
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      }else{
+        await signOut(auth);
       }
     });
 
-    body.querySelector(`[data-del="${d.id}"]`).addEventListener('click', async ()=>{
-      if (!confirm('Delete this submission?')) return;
-      try{
-        await deleteDoc(doc(db,'submissions', d.id));
-        item.remove();
-        await refreshBadges();
-        if (!listEl.querySelector('.item')) emptyEl.style.display = 'block';
-      }catch(err){ alert('Delete failed\n\n'+(err?.message||err)); }
+    /* ===== Tabs & Filters ===== */
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    tabs.forEach(t => t.addEventListener('click', async ()=>{
+      tabs.forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      activeFormTab = t.dataset.form;
+      await loadRows();
+    }));
+
+    document.getElementById('applyBtn').addEventListener('click', loadRows);
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      document.getElementById('branchSel').value = 'all';
+      document.getElementById('statusSel').value = 'all';
+      document.getElementById('fromDate').value = '';
+      document.getElementById('toDate').value = '';
+      loadRows();
     });
 
-    item.appendChild(head);
-    item.appendChild(menu);
-    item.appendChild(body);
-    listEl.appendChild(item);
-  }
-</script>
+    /* ===== Helpers ===== */
+    const fmtDate = (ts) => {
+      if(!ts || !ts.toDate) return '-';
+      const d = ts.toDate();
+      return d.toLocaleDateString([], {year:'numeric', month:'2-digit', day:'2-digit'}) + ', ' +
+             d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    };
+
+    const formKeyOf = (d) => {
+      const raw = (d.form || d.formId || '').toLowerCase();
+      if(raw.includes('english')) return 'english';
+      if(raw.includes('art')) return 'art';
+      if(raw.includes('summer')) return 'summer';
+      if(raw.includes('study')) return 'study';
+      if(raw.includes('corporate')) return 'corporate';
+      return 'other';
+    };
+
+    function statusPill(status){
+      const el = document.createElement('button');
+      el.className = 'statusBtn';
+      el.textContent = (status==='contacted' ? 'Contacted' : status==='registered' ? 'Registered' : 'Action required');
+      if(status==='contacted') el.classList.add('blue');
+      if(status==='registered') el.classList.add('green');
+      return el;
+    }
+
+    /* ===== Query + render ===== */
+    async function loadRows(){
+      if(!currentUser || role!=='admin') return;
+
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+
+      // Build query
+      let q = query(collection(db, 'submissions'), orderBy('createdAt', 'desc'), limit(200));
+
+      // Filter by form tab
+      if(activeFormTab !== 'all'){
+        // coarse filter by presence in form/formId text
+        // (we'll still render-only matching ones just in case)
+      }
+
+      // Status filter (client-side render filter for simplicity)
+      const wantStatus = document.getElementById('statusSel').value; // 'all' | 'action_required' | 'contacted' | 'registered'
+      const wantBranch = document.getElementById('branchSel').value; // 'all' or specific
+
+      // Date filters -> convert to client-side check as we may not always have composite index for every combo
+      const fromVal = document.getElementById('fromDate').value;
+      const toVal   = document.getElementById('toDate').value;
+      const fromMs  = fromVal ? new Date(fromVal+'T00:00:00').getTime() : null;
+      const toMs    = toVal   ? new Date(toVal+'T23:59:59').getTime() : null;
+
+      const snap = await getDocs(q);
+      const rows = [];
+      snap.forEach(docu => rows.push({ id:docu.id, ...docu.data() }));
+
+      // Render
+      rows.forEach(d => {
+        const fk = formKeyOf(d);
+        if(activeFormTab!=='all' && fk!==activeFormTab) return;
+
+        if(wantStatus!=='all' && (d.status||'action_required')!==wantStatus) return;
+
+        if(wantBranch!=='all'){
+          const b = d.branch || d.branchKey || '-';
+          if(b !== wantBranch) return;
+        }
+
+        if(fromMs || toMs){
+          const t = (d.createdAt && d.createdAt.toDate) ? d.createdAt.toDate().getTime() : null;
+          if(fromMs && (!t || t<fromMs)) return;
+          if(toMs && (!t || t>toMs)) return;
+        }
+
+        list.appendChild(renderRow(d));
+      });
+
+      if(list.children.length===0){
+        const z = document.createElement('div');
+        z.style.color = '#637789';
+        z.style.textAlign = 'center';
+        z.style.padding = '28px 0';
+        z.textContent = 'No results';
+        list.appendChild(z);
+      }
+    }
+
+    function renderRow(d){
+      const fk = formKeyOf(d);
+      const row = document.createElement('div');
+      row.className = 'row ' + (d.status || 'action_required');
+
+      // TOP (summary)
+      const head = document.createElement('div');
+      head.className = 'rowHead';
+
+      // Created
+      const c1 = document.createElement('div');
+      c1.innerHTML = `<span class="k">${fmtDate(d.createdAt)}</span>`;
+      head.appendChild(c1);
+
+      // Branch
+      const c2 = document.createElement('div');
+      c2.innerHTML = `<span class="k">${d.branch || '-'}</span>`;
+      head.appendChild(c2);
+
+      // Name
+      const c3 = document.createElement('div');
+      c3.innerHTML = `<span class="k">${[d.firstName,d.lastName].filter(Boolean).join(' ') || '-'}</span>`;
+      head.appendChild(c3);
+
+      // Form
+      const c4 = document.createElement('div');
+      const formLabel = fk==='english' ? 'English' :
+                        fk==='art' ? 'Art' :
+                        fk==='summer' ? 'Summer school' :
+                        fk==='study' ? 'Study abroad' :
+                        fk==='corporate' ? 'Corporate' : (d.form || d.formId || '-');
+      c4.innerHTML = `<span class="k">${formLabel}</span>`;
+      head.appendChild(c4);
+
+      // Course / School (Corporate -> Organisation)
+      const courseLabelValue =
+        fk==='corporate' ? (d.org || '-') :
+        fk==='summer'    ? (d.school || '-') :
+                           (d.course || '-');
+
+      const c5 = document.createElement('div');
+      c5.innerHTML = `<span class="k">${courseLabelValue}</span>`;
+      head.appendChild(c5);
+
+      // Status + menu
+      const c6 = document.createElement('div'); c6.className = 'status';
+      const btn = statusPill(d.status || 'action_required');
+      btn.addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        menu.classList.toggle('open');
+      });
+
+      const menu = document.createElement('div'); menu.className = 'statusMenu';
+      [['action_required','Action required'], ['contacted','Contacted'], ['registered','Registered']].forEach(([val,txt])=>{
+        const it = document.createElement('button');
+        it.textContent = txt;
+        it.addEventListener('click', async (ev)=>{
+          ev.stopPropagation();
+          menu.classList.remove('open');
+          await updateDoc(doc(db,'submissions', d.id), { status: val, updatedAt: serverTimestamp() });
+          btn.className = 'statusBtn' + (val==='contacted' ? ' blue' : val==='registered' ? ' green' : '');
+          btn.textContent = txt;
+          row.className = 'row ' + val;
+          await refreshCounters();
+        });
+        menu.appendChild(it);
+      });
+
+      c6.appendChild(btn);
+      c6.appendChild(menu);
+      head.appendChild(c6);
+
+      // toggle expand
+      head.addEventListener('click', ()=> body.style.display = (body.style.display==='block' ? 'none':'block'));
+      row.appendChild(head);
+
+      // BODY (details)
+      const body = document.createElement('div'); body.className = 'body';
+      const grid = document.createElement('div'); grid.className = 'bodyGrid';
+
+      // Email
+      grid.appendChild(chip('Email', d.email || '-'));
+      // Phone
+      grid.appendChild(chip('Phone', d.phoneE164 || '-'));
+      // Language
+      grid.appendChild(chip('Language', (d.lang || '-')));
+
+      // Branch (blank for corporate is fine)
+      grid.appendChild(chip('Branch', d.branch || '-'));
+
+      // Course/School OR Organisation (corporate)
+      const csLabel = fk==='corporate' ? 'Organisation' : 'Course / School';
+      const csValue = fk==='corporate' ? (d.org || '-') : (fk==='summer' ? (d.school || '-') : (d.course || '-'));
+      grid.appendChild(chip(csLabel, csValue));
+
+      // Form
+      grid.appendChild(chip('Form', formLabel));
+
+      // Age
+      grid.appendChild(chip('Age', (d.age!=null && d.age!=='') ? d.age : '-'));
+
+      // Created
+      grid.appendChild(chip('Created', fmtDate(d.createdAt)));
+
+      // 🔹 Extra Corporate-only fields
+      if(fk==='corporate'){
+        grid.appendChild(chip('Industry', d.industry || '-'));
+        grid.appendChild(chip('Group size', d.groupSize || '-'));
+      }
+
+      // Message
+      const message = document.createElement('div');
+      message.className = 'msg';
+      message.innerHTML = `<div class="cap">Message</div><div class="val">${(d.message || '—')}</div>`;
+
+      // footer
+      const foot = document.createElement('div'); foot.className = 'foot';
+      const del = document.createElement('button'); del.className = 'btn danger'; del.textContent = 'Delete';
+      del.addEventListener('click', async (ev)=> {
+        ev.stopPropagation();
+        if(confirm('Delete this submission?')){
+          await deleteDoc(doc(db,'submissions', d.id));
+          row.remove();
+          await refreshCounters();
+        }
+      });
+      foot.appendChild(del);
+
+      body.appendChild(grid);
+      body.appendChild(message);
+      body.appendChild(foot);
+      row.appendChild(body);
+
+      // close any open menu when clicking outside
+      document.addEventListener('click', (e)=>{
+        if(!c6.contains(e.target)) menu.classList.remove('open');
+      });
+
+      return row;
+    }
+
+    function chip(title, value){
+      const x = document.createElement('div');
+      x.className = 'chip';
+      x.innerHTML = `<div class="cap">${title}</div><div class="val">${value}</div>`;
+      return x;
+    }
+
+    /* ===== Counters (badges on tabs) ===== */
+    async function refreshCounters(){
+      const snap = await getDocs(query(collection(db,'submissions'), where('status','==','action_required')));
+      const counts = { all:0, english:0, art:0, summer:0, study:0, corporate:0 };
+      snap.forEach(s=>{
+        const fk = formKeyOf(s.data());
+        counts.all++;
+        if(counts[fk]!=null) counts[fk]++;
+      });
+      const set = (id,v)=> document.getElementById(id).textContent = v;
+      set('c_all', counts.all);
+      set('c_english', counts.english);
+      set('c_art', counts.art);
+      set('c_summer', counts.summer);
+      set('c_study', counts.study);
+      set('c_corporate', counts.corporate);
+    }
+
+    /* ===== CSV Export ===== */
+    document.getElementById('csvBtn').addEventListener('click', exportCsv);
+    async function exportCsv(){
+      const snap = await getDocs(query(collection(db,'submissions'), orderBy('createdAt','desc'), limit(1000)));
+      const rows = [];
+      rows.push([
+        'Created','Form','Branch','First name','Last name','Email','Phone','Language','Age',
+        'Course/School','Organisation','Industry','Group size','Status','Message'
+      ]);
+      snap.forEach(d=>{
+        const v = d.data();
+        const fk = formKeyOf(v);
+        rows.push([
+          fmtDate(v.createdAt),
+          (v.form || v.formId || ''),
+          v.branch || '',
+          v.firstName || '',
+          v.lastName || '',
+          v.email || '',
+          v.phoneE164 || '',
+          v.lang || '',
+          (v.age!=null ? v.age : ''),
+          fk==='summer' ? (v.school || '') : (fk==='corporate' ? '' : (v.course || '')),
+          fk==='corporate' ? (v.org || '') : '',
+          fk==='corporate' ? (v.industry || '') : '',
+          fk==='corporate' ? (v.groupSize || '') : '',
+          v.status || 'action_required',
+          (v.message || '').replace(/\n/g,' ')
+        ]);
+      });
+
+      const csv = rows.map(r => r.map(x=>{
+        const s = (x==null ? '' : String(x));
+        if(/[",\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+        return s;
+      }).join(',')).join('\n');
+
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'submissions.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  </script>
 </body>
 </html>
 
