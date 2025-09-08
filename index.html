@@ -3,524 +3,419 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Levels – Admin Panel</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;500;700;800&display=swap" rel="stylesheet">
+<title>Levels — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
   :root{
     --bg:#f6f8fb;
     --card:#ffffff;
-    --ink:#0f1f28;
-    --muted:#5c6b78;
-    --soft:#e9eef4;
-    --line:#e8edf3;
-    --badge:#1f6feb;
-    --ok:#24a148;
-    --warn:#efb21a;
-    --danger:#e55353;
-    --pill:#0d2940;
+    --ink:#1f2a37;
+    --muted:#5b6b7a;
+    --pill:#e9eef6;
+    --line:#e7ecf2;
+    --accent:#28425b;
+    --accent-2:#152738;
+    --green:#19a974;
+    --blue:#3b82f6;
+    --red:#ef4444;
+    --yellow:#fff3c4;
+    --shadow:0 10px 25px rgba(16,24,40,.06);
     --radius:18px;
-    --shadow:0 10px 22px rgba(0,0,0,.06);
+    --radius-lg:22px;
   }
 
-  *{ box-sizing:border-box }
-  html,body{ margin:0; background:var(--bg); color:var(--ink); font-family:"Red Hat Display", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-
-  .shell{ max-width:1200px; margin:28px auto 80px; padding:0 18px; }
-
-  /* top bar */
-  .bar{
-    background:var(--card); border-radius:var(--radius); padding:16px 16px 14px; box-shadow:var(--shadow);
-    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg); color:var(--ink); font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   }
-  .bar .me{ font-weight:700; color:var(--muted); margin-right:auto; }
-  .bar select, .bar input[type="date"]{
-    background:#f2f5f9; border:none; border-radius:12px; padding:10px 12px; font-size:14px; color:var(--ink);
-  }
-  .btn{ background:var(--pill); color:#fff; border:none; padding:10px 16px; border-radius:12px; font-weight:800; cursor:pointer; }
-  .btn.ghost{ background:#edf3f9; color:#0d2940; }
 
-  /* tabs */
-  .tabs{ display:flex; gap:12px; margin:18px 0; }
+  .wrap{max-width:1180px; margin:32px auto; padding:0 16px}
+
+  /* Header */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--card); padding:16px; border-radius:var(--radius);
+    box-shadow:var(--shadow); margin-bottom:18px;
+  }
+  .who{font-weight:600}
+  .actions{display:flex; gap:10px}
+  .btn{
+    padding:10px 14px; border-radius:12px; border:1px solid var(--line);
+    background:#fff; cursor:pointer; font-weight:700; color:var(--accent);
+  }
+  .btn.primary{ background:var(--accent); color:#fff; border:none }
+  .btn.danger{ background:#ffe4e4; color:#b42318; border:none }
+  .btn:active{ transform:translateY(1px) }
+
+  /* Tabs */
+  .tabs{ display:flex; gap:10px; margin-bottom:12px; }
   .tab{
-    background:var(--card); color:#0d2940; border-radius:999px; padding:10px 16px; font-weight:800;
-    cursor:pointer; user-select:none; position:relative; box-shadow:var(--shadow);
+    background:#fff; border:1px solid var(--line); color:var(--ink);
+    padding:10px 14px; border-radius:14px; cursor:pointer; font-weight:700;
+    display:flex; align-items:center; gap:8px;
   }
-  .tab.active{ background:#e8f0ff; color:#1a49b8; }
-  .tab .dot{
-    position:absolute; top:-6px; right:-6px; min-width:22px; height:22px; padding:0 6px; border-radius:999px;
-    display:flex; align-items:center; justify-content:center; background:var(--badge); color:#fff; font-size:12px; font-weight:800;
-  }
-
-  /* header row */
-  .hdr{
-    background:var(--card); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow);
-    display:grid; grid-template-columns: 1.1fr .9fr 1fr 1fr 1.1fr .7fr; gap:16px; color:#637789; font-weight:700;
+  .tab.active{ background:#e8f0ff; color:#2645a3; border-color:#d7e3ff }
+  .badge{
+    min-width:22px; height:22px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center;
+    background:#1f2937; color:#fff; font-size:12px; font-weight:800; padding:0 7px;
   }
 
-  /* list */
-  .list{ margin-top:12px; display:flex; flex-direction:column; gap:16px; }
-  .row{
-    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+  /* List card */
+  .card{
+    background:#fff; border-radius:var(--radius-lg); box-shadow:var(--shadow);
+    overflow:hidden;
   }
+  .headRow, .cols{
+    display:grid; grid-template-columns: 180px 140px 1fr 160px 240px 170px; gap:16px; align-items:center;
+  }
+  .headRow{
+    padding:16px 18px; color:#6b7a8b; font-weight:700; border-bottom:1px dashed var(--line);
+  }
+
+  .row{ border-top:1px dashed var(--line); }
   .rowHead{
-    display:grid; grid-template-columns: 1.1fr .9fr 1fr 1fr 1.1fr .7fr; gap:16px;
-    padding:18px 20px; align-items:center; border-bottom:1px dashed var(--line); cursor:pointer;
+    background:#fff; padding:16px 18px; cursor:pointer;
+    display:grid; grid-template-columns: 180px 140px 1fr 160px 240px 170px; gap:16px; align-items:center;
   }
-  .k{
-    display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:700; color:#0d2940;
-  }
-  .sub{ color:var(--muted); font-weight:500; }
+  .row.action_required .rowHead{ background:var(--yellow) }
+  .row .k{ font-weight:800; color:#1f2a37; }
 
-  .status{
-    justify-self:end; position:relative;
-  }
+  .statusCell{ position:relative; display:flex; align-items:center; justify-content:flex-start; }
   .statusBtn{
-    display:inline-flex; align-items:center; gap:8px; border:none; cursor:pointer; font-weight:800;
-    padding:8px 14px; border-radius:999px; color:#fff; background:var(--danger);
+    border:none; border-radius:999px; padding:8px 14px; font-weight:800; cursor:pointer;
+    background:#ffd2cf; color:#a10505;
   }
-  .statusBtn.blue{ background:#2d7ff9 }
-  .statusBtn.green{ background:var(--ok) }
+  .statusBtn.blue{ background:#e8f0ff; color:#1b3ea3 }
+  .statusBtn.green{ background:#e7fbf3; color:#0b6b4f }
+
   .statusMenu{
-    position:absolute; top:calc(100% + 8px); right:0; background:#fff; border-radius:12px; box-shadow:var(--shadow);
-    display:none; min-width:200px; overflow:hidden; z-index:5;
+    position:absolute; top:calc(100% + 8px); left:0;
+    background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow);
+    padding:6px; display:none; z-index:50;
   }
-  .statusMenu.open{ display:block; }
+  .statusMenu.open{ display:block }
   .statusMenu button{
-    display:block; width:100%; background:#fff; border:none; text-align:left; padding:12px 14px; cursor:pointer; font-weight:700;
+    display:block; width:100%; text-align:left; padding:8px 10px; border:none; background:transparent;
+    border-radius:10px; cursor:pointer; font-weight:700; color:#23364a;
   }
-  .statusMenu button:hover{ background:#f4f8ff }
+  .statusMenu button:hover{ background:#f2f5f9 }
 
-  /* expanded */
-  .body{ padding:16px 18px; display:none; background:#fff7d6; }
-  .row.action_required .body{ background:#fff7d6; }
-  .bodyGrid{ display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+  .body{ display:none; padding:16px 18px 18px; background:#fff; border-top:1px dashed var(--line); }
+  .grid{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;
+  }
   .chip{
-    background:#f2f6fb; border-radius:14px; padding:14px; min-height:64px;
+    background:#f7f9fc; border:1px solid var(--line); border-radius:14px; padding:14px;
   }
-  .cap{ color:#637789; font-weight:700; margin-bottom:6px; font-size:14px; }
-  .val{ font-weight:700; color:#0d2940; word-break:break-word; }
-  .msg{ grid-column:1 / -1; background:#f9fcff; border-radius:14px; padding:14px; min-height:70px; }
-  .foot{ display:flex; justify-content:flex-start; gap:8px; margin-top:10px; }
-  .danger{ background:var(--danger)!important; }
+  .cap{ color:#6b7a8b; font-weight:700; font-size:12px; margin-bottom:6px }
+  .val{ font-weight:700; color:#0f1f28; }
+  .msg{ grid-column: 1 / -1; }
+  .foot{ display:flex; gap:10px; margin-top:12px }
 
-  @media (max-width:980px){
-    .hdr, .rowHead{ grid-template-columns: 1.2fr .9fr 1fr 1fr .9fr .8fr; }
-    .bodyGrid{ grid-template-columns: repeat(2,1fr) }
+  /* Empty / loading */
+  .empty{ padding:24px; text-align:center; color:#6b7a8b; font-weight:600 }
+
+  /* Auth */
+  .auth{
+    max-width:420px; margin:80px auto; background:#fff; border-radius:20px; box-shadow:var(--shadow); padding:22px;
   }
-  @media (max-width:680px){
-    .hdr, .rowHead{ grid-template-columns: 1fr 1fr; }
-    .status{ justify-self:start }
-    .bodyGrid{ grid-template-columns: 1fr }
+  .auth h2{ margin:0 0 14px }
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px }
+  .input{ border:1px solid var(--line); border-radius:12px; padding:10px 12px; font-size:16px }
+
+  @media (max-width:1100px){
+    .cols, .rowHead{ grid-template-columns: 160px 120px 1fr 140px 220px 150px; }
+  }
+  @media (max-width:900px){
+    .cols, .rowHead{ grid-template-columns: 140px 110px 1fr 130px 200px 140px; }
+  }
+  @media (max-width:720px){
+    .cols, .rowHead{ grid-template-columns: 120px 1fr 140px; }
+    .headRow{ display:none }
   }
 </style>
 </head>
 <body>
-  <div class="shell">
-    <!-- Top bar -->
-    <div class="bar">
-      <div class="me" id="who">Signed out</div>
-
-      <select id="branchSel">
-        <option value="all">All branches</option>
-        <option value="Vake">Vake</option>
-        <option value="Krtsanisi">Krtsanisi</option>
-        <option value="ვაკე">ვაკე</option>
-        <option value="კრწანისი">კრწანისი</option>
-      </select>
-
-      <select id="statusSel">
-        <option value="all">All statuses</option>
-        <option value="action_required">Action required</option>
-        <option value="contacted">Contacted</option>
-        <option value="registered">Registered</option>
-      </select>
-
-      <input type="date" id="fromDate" />
-      <input type="date" id="toDate" />
-      <button class="btn" id="applyBtn">Apply</button>
-      <button class="btn ghost" id="resetBtn">Reset</button>
-
-      <button class="btn" id="csvBtn">Download Excel</button>
-      <button class="btn danger" id="signBtn">Sign in</button>
+<div class="wrap" id="app">
+  <!-- Auth (hidden when signed in & authorized) -->
+  <div id="auth" class="auth" style="display:none">
+    <h2>Admin sign in</h2>
+    <div class="field">
+      <label>Email</label>
+      <input id="aEmail" class="input" type="email" placeholder="you@levels.ge">
     </div>
-
-    <!-- Tabs -->
-    <div class="tabs" id="tabs">
-      <div class="tab active" data-form="all">All <span class="dot" id="c_all">0</span></div>
-      <div class="tab" data-form="english">English <span class="dot" id="c_english">0</span></div>
-      <div class="tab" data-form="art">Art <span class="dot" id="c_art">0</span></div>
-      <div class="tab" data-form="summer">Summer school <span class="dot" id="c_summer">0</span></div>
-      <div class="tab" data-form="study">Study abroad <span class="dot" id="c_study">0</span></div>
-      <div class="tab" data-form="corporate">Corporate <span class="dot" id="c_corporate">0</span></div>
+    <div class="field">
+      <label>Password</label>
+      <input id="aPass" class="input" type="password" placeholder="••••••••">
     </div>
-
-    <!-- Header row -->
-    <div class="hdr">
-      <div>Created</div>
-      <div>Branch</div>
-      <div>Name</div>
-      <div>Form</div>
-      <div>Course / School</div>
-      <div class="tac">Status</div>
-    </div>
-
-    <!-- Results -->
-    <div class="list" id="list"></div>
+    <button id="aGo" class="btn primary" style="width:100%">Sign in</button>
+    <div id="aMsg" style="margin-top:10px; color:#b42318; font-weight:700"></div>
   </div>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import {
-      getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut
-    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import {
-      initializeFirestore, doc, getDoc, collection, query, where, orderBy, limit, startAt, endAt,
-      getDocs, updateDoc, deleteDoc, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+  <!-- Panel -->
+  <div id="panel" style="display:none">
+    <div class="topbar">
+      <div class="who" id="who"></div>
+      <div class="actions">
+        <button id="csv" class="btn">Download CSV</button>
+        <button id="signout" class="btn">Sign out</button>
+      </div>
+    </div>
 
-    /* === Firebase config === */
-    const firebaseConfig = {
-      apiKey: "AIzaSyB-vfjAb9matVnpO6BVc3xBoFHnT_xXfH0",
-      authDomain: "levels-registration.firebaseapp.com",
-      projectId: "levels-registration",
-      storageBucket: "levels-registration.firebasestorage.app",
-      messagingSenderId: "883788306190",
-      appId: "1:883788306190:web:1da45dc034cca9edefa95f"
-    };
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-key="all">All <span class="badge" id="b-all">0</span></button>
+      <button class="tab" data-key="english">English <span class="badge" id="b-english">0</span></button>
+      <button class="tab" data-key="art">Art <span class="badge" id="b-art">0</span></button>
+      <button class="tab" data-key="summer">Summer school <span class="badge" id="b-summer">0</span></button>
+      <button class="tab" data-key="study">Study abroad <span class="badge" id="b-study">0</span></button>
+      <button class="tab" data-key="corporate">Corporate <span class="badge" id="b-corporate">0</span></button>
+    </div>
 
-    const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db   = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
+    <div class="card">
+      <div class="headRow cols">
+        <div>Created</div>
+        <div>Branch</div>
+        <div>Name</div>
+        <div>Form</div>
+        <div>Course / School</div>
+        <div>Status</div>
+      </div>
+      <div id="list">
+        <div class="empty">Loading…</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    /* ===== State ===== */
-    let currentUser = null;
-    let role = null; // 'admin'
-    let activeFormTab = 'all';
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import {
+    initializeFirestore, collection, query, orderBy, limit, getDocs,
+    doc, getDoc, updateDoc, deleteDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+  import {
+    getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-    const who = document.getElementById('who');
-    const signBtn = document.getElementById('signBtn');
+  /* === Firebase config === */
+  const firebaseConfig = {
+    apiKey: "AIzaSyB-vfjAb9matVnpO6BVc3xBoFHnT_xXfH0",
+    authDomain: "levels-registration.firebaseapp.com",
+    projectId: "levels-registration",
+    storageBucket: "levels-registration.firebasestorage.app",
+    messagingSenderId: "883788306190",
+    appId: "1:883788306190:web:1da45dc034cca9edefa95f"
+  };
 
-    onAuthStateChanged(auth, async (u) => {
-      currentUser = u || null;
-      if(!currentUser){
-        who.textContent = 'Signed out';
-        signBtn.textContent = 'Sign in';
-        document.getElementById('list').innerHTML = '';
-        return;
+  const app = initializeApp(firebaseConfig);
+  const db  = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
+  const auth = getAuth(app);
+
+  // Elements
+  const $ = (sel, el=document)=> el.querySelector(sel);
+  const $$ = (sel, el=document)=> Array.from(el.querySelectorAll(sel));
+  const authBox = $('#auth');
+  const panel   = $('#panel');
+  const aEmail  = $('#aEmail'), aPass = $('#aPass'), aGo = $('#aGo'), aMsg = $('#aMsg');
+  const who     = $('#who');
+  const list    = $('#list');
+  const tabsEl  = $('#tabs');
+
+  // --- Helpers ---
+  const fmtDate = (ts) => {
+    if(!ts || !ts.toDate) return '-';
+    const d = ts.toDate();
+    const pad = n => String(n).padStart(2,'0');
+    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  };
+
+  function formKeyOf(v){
+    const raw = (v.form || v.formId || '').toLowerCase();
+    if(raw.includes('english'))   return 'english';
+    if(raw.includes('art'))       return 'art';
+    if(raw.includes('summer'))    return 'summer';
+    if(raw.includes('study'))     return 'study';
+    if(raw.includes('corporate')) return 'corporate';
+    return 'other';
+  }
+
+  function chip(label, value){
+    const d = document.createElement('div');
+    d.className = 'chip';
+    d.innerHTML = `<div class="cap">${label}</div><div class="val">${value}</div>`;
+    return d;
+  }
+
+  function statusPill(status){
+    const b = document.createElement('button');
+    b.className = 'statusBtn' + (status==='contacted' ? ' blue' : status==='registered' ? ' green' : '');
+    b.textContent = status==='contacted' ? 'Contacted' : status==='registered' ? 'Registered' : 'Action required';
+    return b;
+  }
+
+  // --- Data state ---
+  let allRows = [];     // cache of docs (array of {id, ...data})
+  let activeTab = 'all';
+
+  async function loadAll(){
+    list.innerHTML = `<div class="empty">Loading…</div>`;
+    const q = query(collection(db, 'submissions'), orderBy('createdAt','desc'), limit(500));
+    const snap = await getDocs(q);
+    allRows = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    render();
+    refreshCounters();
+  }
+
+  function refreshCounters(){
+    const counts = {all:0, english:0, art:0, summer:0, study:0, corporate:0};
+    allRows.forEach(v=>{
+      if((v.status || 'action_required') === 'action_required'){
+        counts.all++;
+        counts[formKeyOf(v)] = (counts[formKeyOf(v)]||0) + 1;
       }
-      // role check in /admins/{emailLower}
-      const key = (currentUser.email || '').toLowerCase();
-      const snap = await getDoc(doc(db, 'admins', key));
-      role = snap.exists() && (snap.data().role === 'admin') ? 'admin' : null;
-
-      if(!role){
-        who.textContent = `Signed in as ${currentUser.email} — not authorized`;
-        alert('You are not authorized (missing /admins/{email} with role "admin").');
-        return;
-      }
-
-      who.textContent = `Signed in as ${currentUser.email} (admin)`;
-      signBtn.textContent = 'Sign out';
-
-      await refreshCounters();
-      await loadRows();
     });
-
-    signBtn.addEventListener('click', async ()=>{
-      if(!currentUser){
-        const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
-      }else{
-        await signOut(auth);
-      }
-    });
-
-    /* ===== Tabs & Filters ===== */
-    const tabs = Array.from(document.querySelectorAll('.tab'));
-    tabs.forEach(t => t.addEventListener('click', async ()=>{
-      tabs.forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-      activeFormTab = t.dataset.form;
-      await loadRows();
-    }));
-
-    document.getElementById('applyBtn').addEventListener('click', loadRows);
-    document.getElementById('resetBtn').addEventListener('click', ()=>{
-      document.getElementById('branchSel').value = 'all';
-      document.getElementById('statusSel').value = 'all';
-      document.getElementById('fromDate').value = '';
-      document.getElementById('toDate').value = '';
-      loadRows();
-    });
-
-    /* ===== Helpers ===== */
-    const fmtDate = (ts) => {
-      if(!ts || !ts.toDate) return '-';
-      const d = ts.toDate();
-      return d.toLocaleDateString([], {year:'numeric', month:'2-digit', day:'2-digit'}) + ', ' +
-             d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    };
-
-    const formKeyOf = (d) => {
-      const raw = (d.form || d.formId || '').toLowerCase();
-      if(raw.includes('english')) return 'english';
-      if(raw.includes('art')) return 'art';
-      if(raw.includes('summer')) return 'summer';
-      if(raw.includes('study')) return 'study';
-      if(raw.includes('corporate')) return 'corporate';
-      return 'other';
-    };
-
-    function statusPill(status){
-      const el = document.createElement('button');
-      el.className = 'statusBtn';
-      el.textContent = (status==='contacted' ? 'Contacted' : status==='registered' ? 'Registered' : 'Action required');
-      if(status==='contacted') el.classList.add('blue');
-      if(status==='registered') el.classList.add('green');
-      return el;
+    for(const k of Object.keys(counts)){
+      const el = document.getElementById('b-'+k);
+      if(el) el.textContent = counts[k] || 0;
     }
+  }
 
-    /* ===== Query + render ===== */
-    async function loadRows(){
-      if(!currentUser || role!=='admin') return;
-
-      const list = document.getElementById('list');
-      list.innerHTML = '';
-
-      // Build query
-      let q = query(collection(db, 'submissions'), orderBy('createdAt', 'desc'), limit(200));
-
-      // Filter by form tab
-      if(activeFormTab !== 'all'){
-        // coarse filter by presence in form/formId text
-        // (we'll still render-only matching ones just in case)
-      }
-
-      // Status filter (client-side render filter for simplicity)
-      const wantStatus = document.getElementById('statusSel').value; // 'all' | 'action_required' | 'contacted' | 'registered'
-      const wantBranch = document.getElementById('branchSel').value; // 'all' or specific
-
-      // Date filters -> convert to client-side check as we may not always have composite index for every combo
-      const fromVal = document.getElementById('fromDate').value;
-      const toVal   = document.getElementById('toDate').value;
-      const fromMs  = fromVal ? new Date(fromVal+'T00:00:00').getTime() : null;
-      const toMs    = toVal   ? new Date(toVal+'T23:59:59').getTime() : null;
-
-      const snap = await getDocs(q);
-      const rows = [];
-      snap.forEach(docu => rows.push({ id:docu.id, ...docu.data() }));
-
-      // Render
-      rows.forEach(d => {
-        const fk = formKeyOf(d);
-        if(activeFormTab!=='all' && fk!==activeFormTab) return;
-
-        if(wantStatus!=='all' && (d.status||'action_required')!==wantStatus) return;
-
-        if(wantBranch!=='all'){
-          const b = d.branch || d.branchKey || '-';
-          if(b !== wantBranch) return;
-        }
-
-        if(fromMs || toMs){
-          const t = (d.createdAt && d.createdAt.toDate) ? d.createdAt.toDate().getTime() : null;
-          if(fromMs && (!t || t<fromMs)) return;
-          if(toMs && (!t || t>toMs)) return;
-        }
-
-        list.appendChild(renderRow(d));
-      });
-
-      if(list.children.length===0){
-        const z = document.createElement('div');
-        z.style.color = '#637789';
-        z.style.textAlign = 'center';
-        z.style.padding = '28px 0';
-        z.textContent = 'No results';
-        list.appendChild(z);
-      }
+  function render(){
+    const rows = (activeTab==='all') ? allRows : allRows.filter(v => formKeyOf(v)===activeTab);
+    if(!rows.length){
+      list.innerHTML = `<div class="empty">No submissions.</div>`;
+      return;
     }
+    list.innerHTML = '';
+    rows.forEach(v => list.appendChild(renderRow(v)));
+  }
 
-    function renderRow(d){
-      const fk = formKeyOf(d);
-      const row = document.createElement('div');
-      row.className = 'row ' + (d.status || 'action_required');
+  function renderRow(d){
+    const fk = formKeyOf(d); // 'english' | 'art' | 'summer' | 'study' | 'corporate' | 'other'
+    const row = document.createElement('div');
+    row.className = 'row ' + (d.status || 'action_required');
 
-      // TOP (summary)
-      const head = document.createElement('div');
-      head.className = 'rowHead';
+    // ===== Head (summary) =====
+    const head = document.createElement('div');
+    head.className = 'rowHead';
 
-      // Created
-      const c1 = document.createElement('div');
-      c1.innerHTML = `<span class="k">${fmtDate(d.createdAt)}</span>`;
-      head.appendChild(c1);
+    const c1 = document.createElement('div'); c1.innerHTML = `<span class="k">${fmtDate(d.createdAt)}</span>`;
+    const c2 = document.createElement('div'); c2.innerHTML = `<span class="k">${d.branch || '-'}</span>`;
+    const fullName = [d.firstName, d.lastName].filter(Boolean).join(' ') || '-';
+    const c3 = document.createElement('div'); c3.innerHTML = `<span class="k">${fullName}</span>`;
 
-      // Branch
-      const c2 = document.createElement('div');
-      c2.innerHTML = `<span class="k">${d.branch || '-'}</span>`;
-      head.appendChild(c2);
+    const formLabel = fk==='english' ? 'English'
+                    : fk==='art' ? 'Art'
+                    : fk==='summer' ? 'Summer school'
+                    : fk==='study' ? 'Study abroad'
+                    : fk==='corporate' ? 'Corporate'
+                    : (d.form || d.formId || '-');
+    const c4 = document.createElement('div'); c4.innerHTML = `<span class="k">${formLabel}</span>`;
 
-      // Name
-      const c3 = document.createElement('div');
-      c3.innerHTML = `<span class="k">${[d.firstName,d.lastName].filter(Boolean).join(' ') || '-'}</span>`;
-      head.appendChild(c3);
+    // Course / School (Corporate -> Organisation)
+    const courseValue = fk==='corporate' ? (d.org || '-') : (fk==='summer' ? (d.school || '-') : (d.course || '-'));
+    const c5 = document.createElement('div'); c5.innerHTML = `<span class="k">${courseValue}</span>`;
 
-      // Form
-      const c4 = document.createElement('div');
-      const formLabel = fk==='english' ? 'English' :
-                        fk==='art' ? 'Art' :
-                        fk==='summer' ? 'Summer school' :
-                        fk==='study' ? 'Study abroad' :
-                        fk==='corporate' ? 'Corporate' : (d.form || d.formId || '-');
-      c4.innerHTML = `<span class="k">${formLabel}</span>`;
-      head.appendChild(c4);
-
-      // Course / School (Corporate -> Organisation)
-      const courseLabelValue =
-        fk==='corporate' ? (d.org || '-') :
-        fk==='summer'    ? (d.school || '-') :
-                           (d.course || '-');
-
-      const c5 = document.createElement('div');
-      c5.innerHTML = `<span class="k">${courseLabelValue}</span>`;
-      head.appendChild(c5);
-
-      // Status + menu
-      const c6 = document.createElement('div'); c6.className = 'status';
-      const btn = statusPill(d.status || 'action_required');
-      btn.addEventListener('click', (ev)=>{
-        ev.stopPropagation();
-        menu.classList.toggle('open');
-      });
-
-      const menu = document.createElement('div'); menu.className = 'statusMenu';
-      [['action_required','Action required'], ['contacted','Contacted'], ['registered','Registered']].forEach(([val,txt])=>{
+    const c6 = document.createElement('div'); c6.className = 'statusCell';
+    const btn = statusPill(d.status || 'action_required');
+    const menu = document.createElement('div'); menu.className = 'statusMenu';
+    [['action_required','Action required'],['contacted','Contacted'],['registered','Registered']]
+      .forEach(([val,txt])=>{
         const it = document.createElement('button');
         it.textContent = txt;
         it.addEventListener('click', async (ev)=>{
           ev.stopPropagation();
           menu.classList.remove('open');
           await updateDoc(doc(db,'submissions', d.id), { status: val, updatedAt: serverTimestamp() });
+          d.status = val;
           btn.className = 'statusBtn' + (val==='contacted' ? ' blue' : val==='registered' ? ' green' : '');
           btn.textContent = txt;
           row.className = 'row ' + val;
-          await refreshCounters();
+          refreshCounters();
         });
         menu.appendChild(it);
       });
+    btn.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      menu.classList.toggle('open');       // opens right under the pill
+    });
+    document.addEventListener('click', (e)=>{
+      if(!c6.contains(e.target)) menu.classList.remove('open');
+    });
+    c6.appendChild(btn); c6.appendChild(menu);
 
-      c6.appendChild(btn);
-      c6.appendChild(menu);
-      head.appendChild(c6);
+    head.appendChild(c1); head.appendChild(c2); head.appendChild(c3);
+    head.appendChild(c4); head.appendChild(c5); head.appendChild(c6);
 
-      // toggle expand
-      head.addEventListener('click', ()=> body.style.display = (body.style.display==='block' ? 'none':'block'));
-      row.appendChild(head);
+    // toggle expand
+    const body = document.createElement('div');
+    head.addEventListener('click', (e)=>{
+      if(!c6.contains(e.target)) { body.style.display = (body.style.display==='block' ? 'none' : 'block'); }
+    });
 
-      // BODY (details)
-      const body = document.createElement('div'); body.className = 'body';
-      const grid = document.createElement('div'); grid.className = 'bodyGrid';
+    row.appendChild(head);
 
-      // Email
-      grid.appendChild(chip('Email', d.email || '-'));
-      // Phone
-      grid.appendChild(chip('Phone', d.phoneE164 || '-'));
-      // Language
-      grid.appendChild(chip('Language', (d.lang || '-')));
+    // ===== Body (details) =====
+    body.className = 'body';
+    const grid = document.createElement('div'); grid.className = 'grid';
 
-      // Branch (blank for corporate is fine)
-      grid.appendChild(chip('Branch', d.branch || '-'));
+    grid.appendChild(chip('Email',     d.email || '-'));
+    grid.appendChild(chip('Phone',     d.phoneE164 || '-'));
+    grid.appendChild(chip('Language',  d.lang || '-'));
+    grid.appendChild(chip('Branch',    d.branch || '-'));
 
-      // Course/School OR Organisation (corporate)
-      const csLabel = fk==='corporate' ? 'Organisation' : 'Course / School';
-      const csValue = fk==='corporate' ? (d.org || '-') : (fk==='summer' ? (d.school || '-') : (d.course || '-'));
-      grid.appendChild(chip(csLabel, csValue));
+    const csLabel = fk==='corporate' ? 'Organisation' : 'Course / School';
+    const csValue = fk==='corporate' ? (d.org || '-') : (fk==='summer' ? (d.school || '-') : (d.course || '-'));
+    grid.appendChild(chip(csLabel, csValue));
 
-      // Form
-      grid.appendChild(chip('Form', formLabel));
+    grid.appendChild(chip('Form',      formLabel));
+    grid.appendChild(chip('Age',       (d.age!=null && d.age!=='') ? d.age : '-'));
+    grid.appendChild(chip('Created',   fmtDate(d.createdAt)));
 
-      // Age
-      grid.appendChild(chip('Age', (d.age!=null && d.age!=='') ? d.age : '-'));
+    // Corporate-only extra chips
+    if(fk==='corporate'){
+      grid.appendChild(chip('Industry',   d.industry || '-'));
+      grid.appendChild(chip('Group size', d.groupSize || '-'));
+    }
 
-      // Created
-      grid.appendChild(chip('Created', fmtDate(d.createdAt)));
+    // Message (full width)
+    const msg = document.createElement('div');
+    msg.className = 'chip msg';
+    msg.innerHTML = `<div class="cap">Message</div><div class="val">${d.message || '—'}</div>`;
 
-      // 🔹 Extra Corporate-only fields
-      if(fk==='corporate'){
-        grid.appendChild(chip('Industry', d.industry || '-'));
-        grid.appendChild(chip('Group size', d.groupSize || '-'));
+    const foot = document.createElement('div'); foot.className='foot';
+    const del  = document.createElement('button'); del.className='btn danger'; del.textContent='Delete';
+    del.addEventListener('click', async (ev)=>{
+      ev.stopPropagation();
+      if(confirm('Delete this submission?')){
+        await deleteDoc(doc(db,'submissions', d.id));
+        allRows = allRows.filter(x => x.id !== d.id);
+        render();
+        refreshCounters();
       }
+    });
+    foot.appendChild(del);
 
-      // Message
-      const message = document.createElement('div');
-      message.className = 'msg';
-      message.innerHTML = `<div class="cap">Message</div><div class="val">${(d.message || '—')}</div>`;
+    body.appendChild(grid);
+    body.appendChild(msg);
+    body.appendChild(foot);
+    row.appendChild(body);
 
-      // footer
-      const foot = document.createElement('div'); foot.className = 'foot';
-      const del = document.createElement('button'); del.className = 'btn danger'; del.textContent = 'Delete';
-      del.addEventListener('click', async (ev)=> {
-        ev.stopPropagation();
-        if(confirm('Delete this submission?')){
-          await deleteDoc(doc(db,'submissions', d.id));
-          row.remove();
-          await refreshCounters();
-        }
-      });
-      foot.appendChild(del);
+    return row;
+  }
 
-      body.appendChild(grid);
-      body.appendChild(message);
-      body.appendChild(foot);
-      row.appendChild(body);
-
-      // close any open menu when clicking outside
-      document.addEventListener('click', (e)=>{
-        if(!c6.contains(e.target)) menu.classList.remove('open');
-      });
-
-      return row;
-    }
-
-    function chip(title, value){
-      const x = document.createElement('div');
-      x.className = 'chip';
-      x.innerHTML = `<div class="cap">${title}</div><div class="val">${value}</div>`;
-      return x;
-    }
-
-    /* ===== Counters (badges on tabs) ===== */
-    async function refreshCounters(){
-      const snap = await getDocs(query(collection(db,'submissions'), where('status','==','action_required')));
-      const counts = { all:0, english:0, art:0, summer:0, study:0, corporate:0 };
-      snap.forEach(s=>{
-        const fk = formKeyOf(s.data());
-        counts.all++;
-        if(counts[fk]!=null) counts[fk]++;
-      });
-      const set = (id,v)=> document.getElementById(id).textContent = v;
-      set('c_all', counts.all);
-      set('c_english', counts.english);
-      set('c_art', counts.art);
-      set('c_summer', counts.summer);
-      set('c_study', counts.study);
-      set('c_corporate', counts.corporate);
-    }
-
-    /* ===== CSV Export ===== */
-    document.getElementById('csvBtn').addEventListener('click', exportCsv);
-    async function exportCsv(){
-      const snap = await getDocs(query(collection(db,'submissions'), orderBy('createdAt','desc'), limit(1000)));
-      const rows = [];
-      rows.push([
-        'Created','Form','Branch','First name','Last name','Email','Phone','Language','Age',
-        'Course/School','Organisation','Industry','Group size','Status','Message'
-      ]);
-      snap.forEach(d=>{
-        const v = d.data();
+  // --- CSV ---
+  async function exportCsv(){
+    const rows = [];
+    rows.push([
+      'Created','Form','Branch','First name','Last name','Email','Phone','Language','Age',
+      'Course/School','Organisation','Industry','Group size','Status','Message'
+    ]);
+    (activeTab==='all' ? allRows : allRows.filter(v => formKeyOf(v)===activeTab))
+      .forEach(v=>{
         const fk = formKeyOf(v);
         rows.push([
           fmtDate(v.createdAt),
@@ -540,22 +435,61 @@
           (v.message || '').replace(/\n/g,' ')
         ]);
       });
+    const csv = rows.map(r => r.map(x=>{
+      const s = (x==null ? '' : String(x));
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+    }).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'submissions.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
 
-      const csv = rows.map(r => r.map(x=>{
-        const s = (x==null ? '' : String(x));
-        if(/[",\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
-        return s;
-      }).join(',')).join('\n');
+  // --- Tabs ---
+  tabsEl.addEventListener('click', (e)=>{
+    const t = e.target.closest('.tab');
+    if(!t) return;
+    $$('.tab', tabsEl).forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    activeTab = t.dataset.key;
+    render();
+  });
 
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'submissions.csv';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+  // --- Auth flow ---
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){
+      panel.style.display='none'; authBox.style.display='block';
+      return;
     }
-  </script>
+    // Check /admins/{email}
+    const emailKey = (user.email || '').toLowerCase();
+    const ref = doc(db, 'admins', emailKey);
+    const snap = await getDoc(ref);
+    if(!snap.exists() || (snap.data().role || '').toLowerCase() !== 'admin'){
+      panel.style.display='none'; authBox.style.display='block';
+      aMsg.textContent = 'You are not authorized (missing /admins/{email} with role "admin").';
+      await signOut(auth);
+      return;
+    }
+    // OK
+    who.textContent = `Signed in as ${user.email} (admin)`;
+    authBox.style.display='none'; panel.style.display='block';
+    loadAll();
+  });
+
+  aGo.addEventListener('click', async ()=>{
+    aMsg.textContent = '';
+    try{
+      await signInWithEmailAndPassword(auth, aEmail.value.trim(), aPass.value);
+    }catch(err){
+      aMsg.textContent = err.message || 'Sign in failed';
+    }
+  });
+
+  $('#signout').addEventListener('click', ()=> signOut(auth));
+  $('#csv').addEventListener('click', exportCsv);
+</script>
 </body>
 </html>
 
