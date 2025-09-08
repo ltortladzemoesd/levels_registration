@@ -76,6 +76,23 @@
   .loading{padding:26px;text-align:center}
   @media (max-width:950px){ .boxes{grid-template-columns: repeat(2, 1fr)} .item .head{grid-template-columns: 120px 90px 1fr 160px 140px 120px 40px} }
   @media (max-width:650px){ .boxes{grid-template-columns: 1fr} .bodyGrid{grid-template-columns: 1fr} }
+  /* Make Sign out + Delete buttons red (without affecting other buttons) */
+#logoutBtn,
+.actions .iconBtn[data-del]{
+  background:#e53935;   /* red fill */
+  color:#fff;
+  border-color:#e53935;
+}
+
+#logoutBtn:hover,
+.actions .iconBtn[data-del]:hover{
+  filter: brightness(0.95);
+}
+
+#logoutBtn:active,
+.actions .iconBtn[data-del]:active{
+  transform: translateY(1px);
+}
 </style>
 </head>
 <body>
