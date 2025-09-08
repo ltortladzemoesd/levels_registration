@@ -67,10 +67,25 @@
   .danger{background:#ffd9d9;color:#8a1717;border:none;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
 
   /* status menu */
-  #statusMenu{position:fixed;inset:auto auto 0 0;transform:translate(-9999px, -9999px);background:#fff;border:1px solid #dfe6ee;border-radius:12px;box-shadow:0 12px 24px rgba(0,0,0,.12);padding:6px;z-index:9999}
-  #statusMenu button{display:block;width:100%;text-align:left;background:none;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
-  #statusMenu button:hover{background:#f1f5f9}
-  .sep{height:1px;background:#e8eef5;margin:4px 0}
+  /* replace the whole #statusMenu block */
+#statusMenu{
+  position:fixed;
+  left:-9999px;
+  top:-9999px;
+  background:#fff;
+  border:1px solid #dfe6ee;
+  border-radius:12px;
+  box-shadow:0 12px 24px rgba(0,0,0,.12);
+  padding:6px;
+  z-index:9999;
+  display:none;
+}
+#statusMenu button{
+  display:block;width:100%;text-align:left;background:none;border:none;
+  padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700
+}
+#statusMenu button:hover{background:#f1f5f9}
+.sep{height:1px;background:#e8eef5;margin:4px 0}
 </style>
 </head>
 <body>
@@ -312,17 +327,19 @@
 
   /* expand / delete / status menu */
   const menu = $('#statusMenu'); let menuAnchor=null;
-  function openMenu(anchor,current,id){
-    menuAnchor = anchor;
-    menu.dataset.id = id; // store
-    // position under anchor
-    const r = anchor.getBoundingClientRect();
-    const x = r.left + window.scrollX; const y = r.bottom + 6 + window.scrollY;
-    menu.style.transform = `translate(${x}px, ${y}px)`;
-    menu.removeAttribute('aria-hidden');
-  }
-  function closeMenu(){ menu.setAttribute('aria-hidden','true'); menu.style.transform='translate(-9999px,-9999px)'; menuAnchor=null; }
-
+  function openMenu(anchor, _current, id){
+  const r = anchor.getBoundingClientRect();
+  menu.dataset.id = id;
+  menu.style.left = `${r.left + window.scrollX}px`;
+  menu.style.top  = `${r.bottom + 6 + window.scrollY}px`;
+  menu.style.display = 'block';
+}
+function closeMenu(){
+  menu.style.display = 'none';
+  menu.style.left = '-9999px';
+  menu.style.top  = '-9999px';
+  menu.dataset.id = '';
+}
   document.addEventListener('click', async (e)=>{
     const sub = e.target.closest('.sub');
     const act = e.target.closest('[data-act]');
